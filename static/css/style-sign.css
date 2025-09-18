@@ -1,0 +1,277 @@
+/* Reset */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+html, body {
+  width: 100%;
+  height: 100%;
+  font-family: Arial, sans-serif;
+  background: #f0f4f8;
+  overflow: hidden;
+}
+
+/* Header */
+header {
+  width: 100%;
+  height: 180px;
+  background: linear-gradient(to bottom, #8098bd, #68dbf1);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-family: Georgia, serif;
+}
+header .logo {
+  position: relative;
+  text-align: center;
+}
+header .logo h1 {
+  font-size: 84px;
+  font-weight: 400;
+  color: #1b393f;
+  margin: 0;
+  display: inline-block;
+  position: relative;
+}
+header .logo .subtitle {
+  position: absolute;
+  top: 76px;
+  left: 135px;
+  right: 0;
+  font-size: 19px;
+  color: #707b7c;
+  transform: scaleX(1.3);
+  text-align: center;
+}
+
+/* Main layout */
+main {
+  position: relative;
+  display: flex;
+  height: calc(100vh - 180px);
+  overflow: hidden;
+}
+
+/* Overlay */
+main .overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 50%;
+  height: 100%;
+  background: rgba(162,211,228,0.9);
+  z-index: 2;
+  transform: translateX(0%);
+  transition: transform 0.6s ease;
+}
+
+/* Signup mode: move overlay to right */
+body.signup-mode main .overlay {
+  transform: translateX(100%);
+}
+
+/* Left side */
+.left-side {
+  position: relative;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+/* Left background (scale) */
+.left-side::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: url('../images/signinbg.jpg') no-repeat center center;
+  background-size: cover;
+  transform: scale(1.2);
+  transition: transform 0.6s ease;
+  z-index: 1;
+}
+body.signup-mode .left-side::before {
+  transform: scale(1);
+}
+
+/* Right side */
+.right-side {
+  position: relative;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+/* Right background (scale) */
+.right-side::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: url('../images/signupbg.jpg') no-repeat center center;
+  background-size: cover;
+  transform: scale(1);
+  transition: transform 0.6s ease;
+  z-index: 1;
+}
+body.signup-mode .right-side::before {
+  transform: scale(1.2);
+}
+
+/* Login form */
+.left-side .login-form {
+  position: relative;
+  z-index: 3;
+  width: 500px;
+  text-align: center;
+  background: transparent;
+  padding: 30px;
+  opacity: 1;
+  transition: opacity 0.6s ease;
+}
+body.signup-mode .left-side .login-form {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Signup form */
+.right-side .signup-form {
+  position: relative;
+  z-index: 3;
+  width: 500px;
+  text-align: center;
+  background: transparent;
+  padding: 30px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.6s ease;
+}
+body.signup-mode .right-side .signup-form {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.login-form h2,
+.signup-form h2 {
+  margin-bottom: 20px;
+  font-size: 32px;
+  color: #000;
+  text-align: left;
+  margin-left: -20px;
+}
+
+.form-group {
+  position: relative;
+  margin-bottom: 20px;
+  width: 100%;
+}
+.form-group .form-icon {
+  position: absolute;
+  top: 50%;
+  left: 12px;
+  transform: translateY(-50%);
+  font-size: 20px;
+  color: #000;
+  pointer-events: none;
+}
+.form-group input {
+  width: 100%;
+  padding: 16px 12px 16px 40px;
+  font-size: 16px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background: white;
+  outline: none;
+}
+.form-group .floating-label {
+  position: absolute;
+  top: 18px;
+  left: 40px;
+  color: #888;
+  font-size: 16px;
+  pointer-events: none;
+  transition: all 0.2s ease-out;
+}
+.form-group input:focus + .floating-label,
+.form-group input:valid + .floating-label {
+  top: 3px;
+  left: 42px;
+  font-size: 12px;
+  font-weight: bolder;
+  color: #000;
+}
+
+/* Options */
+.options {
+  display: flex;
+  justify-content: space-between;
+  font-size: 14px;
+  margin-bottom: 15px;
+}
+.options label,
+.options a {
+  color: #fff;
+  text-shadow: 1px 1px 3px rgba(0,0,0,0.7);
+}
+.options a {
+  text-decoration: none;
+}
+.options label:hover,
+.options a:hover {
+  text-shadow: 2px 2px 5px rgba(0,0,0,0.9);
+  cursor: pointer;
+}
+
+/* Button */
+button {
+  width: 100%;
+  padding: 12px;
+  background: #44496b;
+  color: white;
+  font-size: 16px;
+  border: none;
+  border-radius: 25px;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+button:hover {
+  background: #2e3149;
+}
+
+/* Signup link / Signin link */
+.signup-link,
+.signin-link {
+  margin-top: 20px;
+  font-size: 14px;
+}
+.signup-link p a,
+.signin-link p a {
+  color: #007acc;
+  text-decoration: underline;
+  font-weight: bold;
+  margin-left: 8px;
+  transition: color 0.3s;
+}
+.signup-link p a:hover,
+.signin-link p a:hover {
+  color: #005fa3;
+}
+
+/* Admin link */
+.left-side .admin-link {
+  position: absolute;
+  right: -110px;
+  bottom: -80px;
+  color: #333;
+  font-size: 14px;
+  text-decoration: underline;
+  font-weight: normal;
+  text-shadow: none;
+  transition: color 0.3s;
+}
+.left-side .admin-link:hover {
+  color: #555;
+}

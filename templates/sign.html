@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SugarFree - Sign In</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/material-design-iconic-font@2.2.0/dist/css/material-design-iconic-font.min.css">
+  <link rel="stylesheet" href="../static/css/style-sign.css" />
+</head>
+<body>
+  <header>
+    <div class="logo">
+      <h1>
+        SugarFree
+        <span class="subtitle">AI Diabetes Screening</span>
+      </h1>
+    </div>
+  </header>
+
+  <!-- หน้า Sign in -->
+  <main>
+    <div class="left-side">
+      <div class="login-form">
+        <h2>Welcome Back</h2>
+
+
+
+
+
+        <!-- Sign in แก้แล้ว 18.09.68-->
+        <form id="signin-form" method="POST" action="{{ url_for('sign') }}">
+          <div class="form-group">
+            <div class="form-icon">
+              <i class="zmdi zmdi-email"></i>
+            </div>
+            <input type="email" name="email" id="email" required />
+            <label for="email" class="floating-label">Email</label>
+          </div>
+          <div class="form-group">
+            <div class="form-icon">
+              <i class="zmdi zmdi-lock"></i>
+            </div>
+            <input type="password" name="pass" id="pass" required />
+            <label for="pass" class="floating-label">Password</label>
+          </div>
+          <div class="options">
+            <label><input type="checkbox" /> Remember me</label>
+            <a href="#">Forgot Password?</a>
+          </div>
+          <button type="submit">Sign In</button>
+        </form>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        <div class="signup-link">
+          <p>Don't have an account yet? <a href="#" id="signup-link">Sign Up</a></p>
+        </div>
+        <a class="admin-link" href="#">Sign In as Admin</a>
+      </div>
+    </div>
+
+    <!-- หน้า Sign up  -->
+    <div class="right-side">
+      <div class="signup-form">
+        <h2>Create your account</h2>
+        <form>
+          <div class="form-group">
+            <div class="form-icon">
+              <i class="zmdi zmdi-account"></i>
+            </div>
+            <input type="text" name="username" id="username" required />
+            <label for="username" class="floating-label">Username</label>
+          </div>
+          <div class="form-group">
+            <div class="form-icon">
+              <i class="zmdi zmdi-lock"></i>
+            </div>
+            <input type="password" name="password" id="password" required />
+            <label for="password" class="floating-label">Password</label>
+          </div>
+          <div class="form-group">
+            <div class="form-icon">
+              <i class="zmdi zmdi-email"></i>
+            </div>
+            <input type="email" name="email" id="email-signup" required />
+            <label for="email-signup" class="floating-label">Email</label>
+          </div>
+          <button type="submit">Sign Up</button>
+        </form>
+
+        <div class="signin-link">
+          <p>Already have an account? <a href="#" id="signin-link">Sign In</a></p>
+        </div>
+
+      </div>
+    </div>
+    <div class="overlay"></div>
+  </main>
+
+  <script>
+    document.getElementById('signup-link').addEventListener('click', function(e) {
+      e.preventDefault();
+      document.body.classList.add('signup-mode');
+    });
+
+    document.getElementById('signin-link').addEventListener('click', function(e) {
+      e.preventDefault();
+      document.body.classList.remove('signup-mode');
+    });
+
+  </script>
+  
+</body>
+</html>

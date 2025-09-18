@@ -1,0 +1,40 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<h1>Welcome, {{ user }}</h1>
+<h1>Diabetes Risk Assessment</h1>
+<div class="container mt-5">
+    <form method="POST">
+        {{ form.hidden_tag() }}
+
+        <p>{{ form.highbp.label }} {{ form.highbp() }}</p>
+        <p>{{ form.highchol.label }} {{ form.highchol() }}</p>
+        <p>{{ form.heart.label }} {{ form.heart() }}</p>
+        <p>{{ form.diffwalk.label }} {{ form.diffwalk() }}</p>
+
+        <p>{{ form.height.label }} {{ form.height(size=5) }}</p>
+        <p>{{ form.weight.label }} {{ form.weight(size=5) }}</p>
+
+        <p>{{ form.genhlth.label }} {{ form.genhlth() }}</p>
+        <p>{{ form.physhlth.label }} {{ form.physhlth(size=5) }}</p>
+
+        <p>{{ form.age.label }} {{ form.age() }}</p>
+
+        <p>{{ form.model_choice.label }} {{ form.model_choice() }}</p>
+
+        {{ form.submit() }}
+    </form>
+
+    <hr>
+    {% if prediction is not none %}
+        <h3>ผลการประเมิน</h3>
+        ความน่าจะเป็น: <strong>{{ probability }}%</strong><br>
+        คำตอบ: 
+        {% if prediction == 1 %}
+            <span style="color:red;"><strong>เป็นเบาหวาน (1)</strong></span>
+        {% else %}
+            <span style="color:green;"><strong>ไม่เป็นเบาหวาน (0)</strong></span>
+        {% endif %}
+    {% endif %}
+</div>
+{% endblock %}
