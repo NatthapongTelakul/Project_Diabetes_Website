@@ -1,135 +1,23 @@
-/* ====== Reset พื้นฐานให้ผังสวยเท่ากันทุกเบราว์เซอร์ ====== */
-*{margin:0;padding:0;box-sizing:border-box}
-html,body{width:100%;height:100%;font-family:Arial,Helvetica,sans-serif;background:#f0f4f8}
-
-/* ====== Header ด้านบน (พื้นฟ้า) ====== */
-header{
-  width:100%;
-  height:230px;
-  background:#26bfdc;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  font-family:Georgia,serif;
-  position:relative;
-}
-
-/* โลโก้ซ้ายบน (เลื่อนไว้ตามภาพตัวอย่างเดิม) */
-header .logo{
-  position:relative;
-  text-align:center;
-  left:-600px;
-  top:-65px}
-header .logo h1{
-  font-size:48px;
-  font-weight:400;
-  color:#0a3239;
-  position:relative}
-header .logo .subtitle{
-  position:absolute;
-  top:45px;
-  left:75px;
-  font-size:14px;
-  color:#707b7c;
-  text-align:center
-}
-
-/* ข้อความ Welcome กลางหัว */
-header .welcome{
-  position:absolute;
-  left:50%;top:50px;
-  transform:translate(-50%,-50%);
-  font-size:52px;
-  color:#fff
-}
-
-/* ช่องค้นหามุมขวา */
-header .search{
-  position:absolute;
-  right:100px;
-  top:50px;
-  transform:translateY(-50%);
-  width:min(250px,42vw)
-}
-header .search input{
-  width:100%;
-  padding:10px 42px 10px 14px;
-  border:none;
-  outline:0;
-  border-radius:12px;
-  background:#fff;
-  color:#123;
-  box-shadow:inset 0 0 0 1px rgba(0,0,0,.06)
-}
-header .search button{
-  position:absolute;
-  right:6px;
-  top:50%;
-  transform:translateY(-50%);
-  width:32px;
-  height:32px;
-  border:none;
-  background:transparent;
-  color:#000;
-  cursor:pointer
-}
-
-/* แถบแท็บ (ท่อนล่างของ header) */
-header>.tabbar{
-  position:absolute;
-  left:0;right:0;bottom:0;
-  height:90px;background:#1d64c6;
-  display:flex;
-  align-items:center;
-  justify-content:space-around;
-  padding:0 24px;
-  overflow:visible;z-index:2
-}
-
-/* ปุ่มแต่ละแท็บ */
-header>.tabbar .tab{
-  position:relative;
-  background:transparent;
-  border:0;outline:0;width:72px;height:72px;
-  display:grid;
-  place-items:center;
-  cursor:pointer;
-  color:#fff;
-  font-size:0;z-index:3
-}
-header>.tabbar .tab i{
-  font-size:30px;
-  line-height:1;
-  transition:transform .45s cubic-bezier(.22,.75,.25,1)}
-header>.tabbar .tab.is-active i{
-  transform:translateY(-28px)} /* ดันไอคอนเข้าไปในวงกลม */
-
-/* วงกลม indicator (ไฮไลต์ตำแหน่งแท็บ) */
-header>.tabbar .tab-indicator{
-  position:absolute;
-  top:-22px;
-  left:0;
-  width:78px;
-  height:78px;
-  border-radius:50%;
-  pointer-events:none;
-  transform:translateX(0);
-  transition:transform .45s cubic-bezier(.22,.75,.25,1),background .3s;
-  background:#1d64c6;z-index:2
-}
-
-/* รอยเว้าตัดจากพื้นฟ้าสว่างด้านบนให้เนียนกับวงกลม */
-header>.tabbar .tab-notch{
-  position:absolute;
-  top:-46px;
-  left:0;
-  width:105px;height:115px;background:#26bfdc;
-  border-radius:50%;transform:translateX(0);
-  transition:transform .45s cubic-bezier(.22,.75,.25,1);z-index:1
-}
-
 /* พื้นที่คอนเทนต์ของหน้า */
 .page{padding:24px}
+
+button {
+  background-color: #4CAF50; /* Green background */
+  color: white; /* White text */
+  padding: 10px 20px; /* Padding around text */
+  border: none; /* No border */
+  border-radius: 5px; /* Rounded corners */
+  font-size: 20px; /* Text size */
+  cursor: pointer; /* Change cursor on hover */
+}
+
+button:hover {
+  background-color: #45a049; /* Darker green on hover */
+}
+
+button:active {
+  background-color: #3e8e41; /* Even darker green when clicked */
+}
 
 .container {
   display: flex;

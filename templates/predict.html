@@ -1,40 +1,48 @@
-{% extends "layout.html" %}
+{% extends "header.html" %}
 
 {% block content %}
-<h1>Welcome, {{ user }}</h1>
-<h1>Diabetes Risk Assessment</h1>
-<div class="container mt-5">
-    <form method="POST">
-        {{ form.hidden_tag() }}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style-predict.css') }}">
 
-        <p>{{ form.highbp.label }} {{ form.highbp() }}</p>
-        <p>{{ form.highchol.label }} {{ form.highchol() }}</p>
-        <p>{{ form.heart.label }} {{ form.heart() }}</p>
-        <p>{{ form.diffwalk.label }} {{ form.diffwalk() }}</p>
+<h1 class="">Diabetes Risk Assessment</h1>
 
-        <p>{{ form.height.label }} {{ form.height(size=5) }}</p>
-        <p>{{ form.weight.label }} {{ form.weight(size=5) }}</p>
+<div class="page-layout">
+    <!-- ฟอร์ม (ซ้าย) -->
+    <div class="form-section">
+        <form method="POST">
+            {{ form.hidden_tag() }}
 
-        <p>{{ form.genhlth.label }} {{ form.genhlth() }}</p>
-        <p>{{ form.physhlth.label }} {{ form.physhlth(size=5) }}</p>
+            <div class="form-field">{{ form.highbp.label }} คุณเคยได้รับการวินิจฉัยจากโรงพยาบาลว่ามีความดันโลหิตสูงหรือไม่ {{ form.highbp() }}</div>
+            <div class="form-field">{{ form.highchol.label }} {{ form.highchol() }}</div>
+            <div class="form-field">{{ form.heart.label }} {{ form.heart() }}</div>
+            <div class="form-field">{{ form.diffwalk.label }} {{ form.diffwalk() }}</div>
 
-        <p>{{ form.age.label }} {{ form.age() }}</p>
+            <div class="form-field">{{ form.height.label }} {{ form.height(size=5) }}</div>
+            <div class="form-field">{{ form.weight.label }} {{ form.weight(size=5) }}</div>
 
-        <p>{{ form.model_choice.label }} {{ form.model_choice() }}</p>
+            <div class="form-field">{{ form.genhlth.label }} {{ form.genhlth() }}</div>
+            <div class="form-field">{{ form.physhlth.label }} {{ form.physhlth(size=5) }}</div>
 
-        {{ form.submit() }}
-    </form>
+            <div class="form-field">{{ form.age.label }} {{ form.age() }}</div>
+            <div class="form-field">{{ form.model_choice.label }} {{ form.model_choice() }}</div>
 
-    <hr>
-    {% if prediction is not none %}
-        <h3>ผลการประเมิน</h3>
-        ความน่าจะเป็น: <strong>{{ probability }}%</strong><br>
-        คำตอบ: 
-        {% if prediction == 1 %}
-            <span style="color:red;"><strong>เป็นเบาหวาน (1)</strong></span>
+            {{ form.submit() }}
+        </form>
+    </div>
+
+    <!-- ผลการประเมิน (ขวา) -->
+    <div class="result-section">
+        {% if prediction is not none %}
+            <h3>ผลการประเมิน</h3>
+            ความน่าจะเป็น: <strong>{{ probability }}%</strong><br>
+            คำตอบ: 
+            {% if prediction == 1 %}
+                <span style="color:red;"><strong>เป็นเบาหวาน (1)</strong></span>
+            {% else %}
+                <span style="color:green;"><strong>ไม่เป็นเบาหวาน (0)</strong></span>
+            {% endif %}
         {% else %}
-            <span style="color:green;"><strong>ไม่เป็นเบาหวาน (0)</strong></span>
+            <p><em>กรอกข้อมูลแล้วกด Submit เพื่อดูผลการประเมิน</em></p>
         {% endif %}
-    {% endif %}
+    </div>
 </div>
 {% endblock %}

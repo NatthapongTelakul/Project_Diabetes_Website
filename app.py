@@ -82,7 +82,7 @@ def sign():
         if email == 'user123@gmail.com' and password == '123456':
             session['isLoggedIn'] = True
             session['userEmail'] = email
-            return redirect(url_for('home'))  # ไปหน้า predict.html
+            return redirect(url_for('home')) # เปลี่ยนเป็นหน้า home
         else:
             flash('Email หรือ Password ไม่ถูกต้อง', 'error')
             return render_template('sign.html')  # โหลดหน้าเดิมพร้อม error
@@ -93,12 +93,12 @@ def sign():
 def home():
     return render_template('home.html')
 
-
-@app.route('/predict')
+@app.route('/predict', methods=['GET', 'POST'])
 def predict():
-    if not session.get('isLoggedIn'):
-        return redirect(url_for('sign'))  # ถ้าไม่ได้ login ให้กลับไป sign in
+    # user_id = session.get('user_id')
+    # username = session.get('username')
     form = MyForm()
+    
     prediction_result = None
     probability = None
 
@@ -164,10 +164,12 @@ def predict():
         # เก็บผลใน session
         session['prediction'] = prediction_result
         session['probability'] = probability
+
+        # เก็บค่าลง database พร้อมผลการพยากรณ์
+        # save_to_db(user_id, username, prediction_result, probability)
     return render_template('predict.html', form=form,
                            prediction=session.get('prediction'),
-                           probability=session.get('probability'),
-                           user=session.get('userEmail'))
+                           probability=session.get('probability'))
 
 @app.route('/admin')
 def profile():
