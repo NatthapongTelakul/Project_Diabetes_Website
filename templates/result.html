@@ -1,0 +1,33 @@
+{% extends "header.html" %}
+{% block content %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style-result.css') }}">
+<div class="result-card">
+  <h2>ผลการประเมิน</h2>
+  <p>BMI: <strong>{{ bmi }}</strong></p>
+  <p>ความน่าจะเป็น: 
+    {% if probability is not none %}
+      <strong>{{ probability }}%</strong>
+    {% else %}
+      <em>(ไม่สามารถคำนวณความน่าจะเป็นได้)</em>
+    {% endif %}
+  </p>
+
+  <p>คำตอบ: 
+  {% if prediction == 1 %}
+    <span class="bad">เป็นเบาหวาน</span>
+  {% else %}
+    <span class="good">ไม่เป็นเบาหวาน</span>
+  {% endif %}
+  </p>
+
+  <hr>
+  <h3>ข้อมูลที่กรอก</h3>
+  <ul>
+    {% for k,v in data.items() %}
+      <li>{{ k }} : {{ v }}</li>
+    {% endfor %}
+  </ul>
+
+  <a class="btn" href="{{ url_for('predict_step', step=1) }}">ทำแบบประเมินใหม่</a>
+</div>
+{% endblock %}

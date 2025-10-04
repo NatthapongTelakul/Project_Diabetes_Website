@@ -1,0 +1,72 @@
+/* style-step.css */
+.step-wrap {
+  max-width: 900px;
+  margin: 20px auto;
+}
+.card {
+  display: flex;
+  gap: 20px;
+  border: 1px solid #ddd;
+  padding: 16px;
+  border-radius: 8px;
+  background: #fff;
+  align-items: center;
+}
+.left {
+  flex: 0 0 320px;
+  text-align: center;
+}
+.left img {
+  max-width: 100%;
+  border-radius: 8px;
+}
+.right {
+  flex: 1;
+}
+.form-row label {
+  display: block;
+  font-weight: 600;
+  margin-top: 8px;
+}
+.input {
+  margin-bottom: 8px;
+}
+input[type="number"],
+select {
+  padding: 8px;
+  width: 100%;
+  box-sizing: border-box;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
+input[type="radio"] {
+  margin-right: 6px;
+}
+.actions {
+  margin-top: 14px;
+  text-align: right;
+}
+.btn {
+  padding: 8px 12px;
+  border-radius: 6px;
+  text-decoration: none;
+  color: #fff;
+  background: #0d6efd;
+  border: none;
+  cursor: pointer;
+}
+.btn.back {
+  background: #6c757d;
+  margin-right: 8px;
+  width: 90px;
+  text-align: center;
+  display: inline-block;
+}
+.btn.next {
+  background: #0d6efd;
+}
+.errors {
+  color: #c00;
+  font-size: 0.9em;
+  margin-top: 4px;
+}

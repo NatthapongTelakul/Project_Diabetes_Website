@@ -3,9 +3,12 @@ import joblib
 import pandas as pd
 import numpy as np
 from flask import Flask, render_template, request, redirect, url_for, flash, session
-from flask_wtf import FlaskForm
-from wtforms import RadioField, SelectField, SubmitField, IntegerField
-from wtforms.validators import DataRequired, NumberRange
+
+from forms import (
+    HighBPForm, HighCholForm, HeartForm, DiffWalkForm,
+    HeightAndWeightForm, GenHlthForm, PhyshlthForm,
+    AgeForm, ModelChoiceForm
+)
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'mykey'
@@ -21,53 +24,20 @@ def bmi_category_code(bmi):
     else:
         return 3   # Obese
 
-class MyForm(FlaskForm):
-    # Features
-    highbp = RadioField('HighBP', choices=[('0','No'), ('1','Yes')], validators=[DataRequired()])
-    highchol = RadioField('HighChol', choices=[('0','No'), ('1','Yes')], validators=[DataRequired()])
-    heart = RadioField('Heart Disease or Attack?', choices=[('0','No'), ('1','Yes')], validators=[DataRequired()])
-    diffwalk = RadioField('Difficulty walking?', choices=[('0','No'), ('1','Yes')], validators=[DataRequired()])
+# Step configuration: name, form class, image file (optional)
+steps = [
+    {"name": "highbp", "form": HighBPForm, "image": "highbp.png"},
+    {"name": "highchol", "form": HighCholForm, "image": "highchol.png"},
+    {"name": "heart", "form": HeartForm, "image": "heart.png"},
+    {"name": "diffwalk", "form": DiffWalkForm, "image": "diffwalk.png"},
+    {"name": "height_weight", "form": HeightAndWeightForm, "image": "height_weight.png"},
+    {"name": "genhlth", "form": GenHlthForm, "image": "genhlth.png"},
+    {"name": "physhlth", "form": PhyshlthForm, "image": "physhlth.png"},
+    {"name": "age", "form": AgeForm, "image": "age.png"},
+    {"name": "model_choice", "form": ModelChoiceForm, "image": "model_choice.png"},
+]
 
-    height = IntegerField('Height (cm)', validators=[DataRequired(), NumberRange(min=50, max=250)])
-    weight = IntegerField('Weight (kg)', validators=[DataRequired(), NumberRange(min=20, max=300)])
-
-    genhlth = SelectField('General Health (1=Excellent → 5=Poor)', 
-                          choices=[('1','Excellent'), ('2','Very good'), ('3','Good'), ('4','Fair'), ('5','Poor')])
-    physhlth = IntegerField('Physical health not good (0-30 days)', validators=[NumberRange(min=0, max=30)])
-
-    age = SelectField('Age Group', choices=[
-        ('1','18-24'), ('2','25-29'), ('3','30-34'), ('4','35-39'),
-        ('5','40-44'), ('6','45-49'), ('7','50-54'), ('8','55-59'),
-        ('9','60-64'), ('10','65-69'), ('11','70-74'), ('12','75-79'), ('13','80+')
-    ])
-
-    # เลือกโมเดล
-    model_choice = SelectField('เลือกโมเดลประเมินเบาหวาน', choices=[
-        ('decision_tree', 'Decision Tree'),
-        ('knn', 'KNN'),
-        ('naive_bayes', 'Naive Bayes'),
-        ('random_forest', 'Random Forest')
-    ])
-
-    submit = SubmitField('ประเมิน')
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+# เริ่มต้นการทำงานที่ index.html
 @app.route('/', methods=['GET', 'POST'])
 def index():
     return render_template('index.html')
@@ -93,48 +63,84 @@ def sign():
 def home():
     return render_template('home.html')
 
-@app.route('/predict', methods=['GET', 'POST'])
-def predict():
-    # user_id = session.get('user_id')
-    # username = session.get('username')
-    form = MyForm()
-    
-    prediction_result = None
-    probability = None
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# redirect /predict -> /predict/1
+@app.route('/predict')
+def predict_root():
+    return redirect(url_for('predict_step', step=1))
+
+@app.route('/predict/<int:step>', methods=['GET', 'POST'])
+def predict_step(step):
+    total_steps = len(steps)
+    if step < 1 or step > total_steps:
+        return redirect(url_for('predict_step', step=1))
+
+    step_cfg = steps[step - 1]
+    FormClass = step_cfg['form']
+    form = FormClass()
 
     if form.validate_on_submit():
-        # ดึงค่าจากฟอร์ม
-        highbp = int(form.highbp.data)
-        highchol = int(form.highchol.data)
-        heart = int(form.heart.data)
-        diffwalk = int(form.diffwalk.data)
-        genhlth = int(form.genhlth.data)
-        physhlth = int(form.physhlth.data)
-        age = int(form.age.data)
+        # เก็บทุก field ในฟอร์มลง session (ยกเว้น csrf & submit)
+        for fname, ffield in form._fields.items():
+            if fname in ('csrf_token', 'submit'):
+                continue
+            session[fname] = ffield.data
+        # ถ้าเป็น step สุดท้าย ให้ไปหน้า result
+        if step == total_steps:
+            return redirect(url_for('result'))
+        # นอกจากนั้น step ถัดไป
+        return redirect(url_for('predict_step', step=step + 1))
 
-        # คำนวณ BMI
-        height_m = form.height.data / 100
-        bmi = int(form.weight.data / (height_m ** 2))
+    image = step_cfg.get('image')
+    return render_template('step.html', form=form, step=step, total=total_steps, image=image)
 
-        # BMI Category
+@app.route('/predict/result')
+def result():
+    # เอาข้อมูลจาก session มาจัด features
+    # ระวังค่าสตริง -> แปลงเป็น int ก่อนใช้
+    try:
+        highbp = int(session.get('highbp', 0))
+        highchol = int(session.get('highchol', 0))
+        heart = int(session.get('heart', 0))
+        diffwalk = int(session.get('diffwalk', 0))
+        genhlth = int(session.get('genhlth', 3))
+        physhlth = int(session.get('physhlth', 0))
+        # age stored as choice string like "1","2"... convert to index or numeric representation you used in training
+        age_choice = session.get('age', "1")
+        age = int(age_choice)
+        # height & weight
+        height = session.get('height')
+        weight = session.get('weight')
+        if height is not None and weight is not None:
+            height = float(height)
+            weight = float(weight)
+            height_m = height / 100.0
+            bmi = weight / (height_m ** 2)
+            bmi = round(bmi, 2)
+        else:
+            bmi = 0.0
+
         bmi_cat = bmi_category_code(bmi)
+        bmi_age_interaction = int(round(bmi * age))
 
-        # BMI x Age interaction
-        bmi_age_interaction = int(bmi * age)
-
-        # เก็บใน session
-        session['highbp'] = highbp
-        session['highchol'] = highchol
-        session['heart'] = heart
-        session['diffwalk'] = diffwalk
-        session['genhlth'] = genhlth
-        session['physhlth'] = physhlth
-        session['age'] = age
-        session['bmi'] = bmi
-        session['bmi_cat'] = bmi_cat
-        session['bmi_age_interaction'] = bmi_age_interaction
-
-        # เตรียม feature vector ตามลำดับที่ใช้ตอนเทรน
+        # สร้าง DataFrame ตาม feature ที่โมเดลคาดหวัง
         features = pd.DataFrame([{
             'HighBP': highbp,
             'HighChol': highchol,
@@ -148,34 +154,116 @@ def predict():
             'BMI_Age_interaction': bmi_age_interaction
         }])
 
+        # เลือกโมเดลจาก session (value เช่น 'random_forest', 'knn' ...)
+        model_name = session.get('model_choice', 'random_forest')
+        model_path = os.path.join('models', f"{model_name}.joblib")
+        if os.path.exists(model_path):
+            model = joblib.load(model_path)
+            y_pred = model.predict(features)[0]
+            # ถ้าโมเดลมี predict_proba
+            try:
+                y_prob = model.predict_proba(features)[0][1] * 100
+            except Exception:
+                y_prob = None
+            prediction_result = int(y_pred)
+            probability = round(y_prob, 2) if y_prob is not None else None
+        else:
+            # หากไม่มีโมเดล ให้ mock ผลลัพธ์ (หรือแจ้ง error)
+            prediction_result = 0
+            probability = None
 
-        # โหลดโมเดล
-        model_name = form.model_choice.data
-        model_path = os.path.join("models", f"{model_name}.joblib")
-        model = joblib.load(model_path)
+        # ส่งข้อมูลไปแสดง
+        data = {cfg['name']: session.get(cfg['name']) for cfg in steps}
+        return render_template('result.html',
+                               prediction=prediction_result,
+                               probability=probability,
+                               data=data,
+                               bmi=bmi)
+    except Exception as e:
+        # แสดง error ง่ายๆ (คุณอาจอยากบันทึก/แจ้งอย่างดีกว่านี้)
+        return f"Error preparing result: {e}", 500
 
-        # ทำการพยากรณ์
-        y_pred = model.predict(features)[0]
-        y_prob = model.predict_proba(features)[0][1] * 100  # ความน่าจะเป็น class 1 (%)
+# @app.route('/predict', methods=['GET', 'POST'])
+# def predict():
+#     # user_id = session.get('user_id')
+#     # username = session.get('username')
+#     form = MyForm()
+    
+#     prediction_result = None
+#     probability = None
 
-        prediction_result = int(y_pred)
-        probability = round(y_prob, 2)
+#     if form.validate_on_submit():
+#         # ดึงค่าจากฟอร์ม
+#         highbp = int(form.highbp.data)
+#         highchol = int(form.highchol.data)
+#         heart = int(form.heart.data)
+#         diffwalk = int(form.diffwalk.data)
+#         genhlth = int(form.genhlth.data)
+#         physhlth = int(form.physhlth.data)
+#         age = int(form.age.data)
 
-        # เก็บผลใน session
-        session['prediction'] = prediction_result
-        session['probability'] = probability
+#         # คำนวณ BMI
+#         height_m = form.height.data / 100
+#         bmi = int(form.weight.data / (height_m ** 2))
 
-        # เก็บค่าลง database พร้อมผลการพยากรณ์
-        # save_to_db(user_id, username, prediction_result, probability)
-    return render_template('predict.html', form=form,
-                           prediction=session.get('prediction'),
-                           probability=session.get('probability'))
+#         # BMI Category
+#         bmi_cat = bmi_category_code(bmi)
 
-@app.route('/admin')
+#         # BMI x Age interaction
+#         bmi_age_interaction = int(bmi * age)
+
+#         # เก็บใน session
+#         session['highbp'] = highbp
+#         session['highchol'] = highchol
+#         session['heart'] = heart
+#         session['diffwalk'] = diffwalk
+#         session['genhlth'] = genhlth
+#         session['physhlth'] = physhlth
+#         session['age'] = age
+#         session['bmi'] = bmi
+#         session['bmi_cat'] = bmi_cat
+#         session['bmi_age_interaction'] = bmi_age_interaction
+
+#         # เตรียม feature vector ตามลำดับที่ใช้ตอนเทรน
+#         features = pd.DataFrame([{
+#             'HighBP': highbp,
+#             'HighChol': highchol,
+#             'BMI': bmi,
+#             'HeartDiseaseorAttack': heart,
+#             'GenHlth': genhlth,
+#             'PhysHlth': physhlth,
+#             'DiffWalk': diffwalk,
+#             'Age': age,
+#             'BMI_cat_code': bmi_cat,
+#             'BMI_Age_interaction': bmi_age_interaction
+#         }])
+
+
+#         # โหลดโมเดล
+#         model_name = form.model_choice.data
+#         model_path = os.path.join("models", f"{model_name}.joblib")
+#         model = joblib.load(model_path)
+
+#         # ทำการพยากรณ์
+#         y_pred = model.predict(features)[0]
+#         y_prob = model.predict_proba(features)[0][1] * 100  # ความน่าจะเป็น class 1 (%)
+
+#         prediction_result = int(y_pred)
+#         probability = round(y_prob, 2)
+
+#         # เก็บผลใน session
+#         session['prediction'] = prediction_result
+#         session['probability'] = probability
+
+#         # เก็บค่าลง database พร้อมผลการพยากรณ์
+#         # save_to_db(user_id, username, prediction_result, probability)
+#     return render_template('predict.html', form=form,
+#                            prediction=session.get('prediction'),
+#                            probability=session.get('probability'))
+
+@app.route('/admin-contact')
 def profile():
-    # ชื่อ อายุ
-    username = "natthapong"
-    return render_template('admin.html', username = username)    
+    return render_template('admin.html')    
 
 if __name__ == "__main__":
     app.run(debug=True) # เปิด debug mode (ต้องปิดเมื่อ deploy จริง)

@@ -1,0 +1,27 @@
+/* style-result.css */
+.result-card {
+  max-width: 700px;
+  margin: 20px auto;
+  padding: 20px;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  background: #fff;
+  text-align: left;
+}
+.result-card .good {
+  color: green;
+  font-weight: 700;
+}
+.result-card .bad {
+  color: red;
+  font-weight: 700;
+}
+.result-card .btn {
+  display: inline-block;
+  margin-top: 16px;
+  padding: 8px 12px;
+  background: #0d6efd;
+  color: #fff;
+  border-radius: 6px;
+  text-decoration: none;
+}
