@@ -2,7 +2,13 @@ import os
 import joblib
 import pandas as pd
 import numpy as np
-from flask import Flask, render_template, request, redirect, url_for, flash, session
+from flask import Flask, render_template, request, redirect, url_for, flash, session, jsonify
+
+from db_config import init_db
+from dotenv import load_dotenv
+from flask_bcrypt import Bcrypt
+from flask_jwt_extended import JWTManager
+from flask_mysqldb import MySQL
 
 from forms import (
     HighBPForm, HighCholForm, HeartForm, DiffWalkForm,
@@ -10,8 +16,37 @@ from forms import (
     AgeForm, ModelChoiceForm
 )
 
+# โหลดค่าจากไฟล์ .env
+load_dotenv()
+
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'mykey'
+
+# ตั้งค่าจาก .env
+app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
+app.config['JWT_SECRET_KEY'] = os.getenv('JWT_SECRET_KEY')  # flask-jwt-extended
+
+# ตั้งค่า MySQL
+app.config['MYSQL_HOST'] = os.getenv('MYSQL_HOST')
+app.config['MYSQL_USER'] = os.getenv('MYSQL_USER')
+app.config['MYSQL_PASSWORD'] = os.getenv('MYSQL_PASSWORD')
+app.config['MYSQL_DB'] = os.getenv('MYSQL_DB')
+
+# Cookie / CSRF related
+app.config['JWT_ACCESS_TOKEN_EXPIRES'] = 900  # 15 minutes
+app.config['JWT_REFRESH_TOKEN_EXPIRES'] = 60*60*24*7  # 7 days
+
+# เริ่มต้นใช้งานส่วนเสริม
+mysql = MySQL(app)
+bcrypt = Bcrypt(app)
+jwt = JWTManager(app)
+
+# ทดลองใช้งาน JWT
+@jwt.invalid_token_loader
+def invalid_token_callback(error):
+    return {'error': 'Invalid token'}, 401
+
+# เรียกใช้การเชื่อมต่อ DB
+mysql = init_db(app)
 
 # ฟังก์ชันคำนวณ BMI Category
 def bmi_category_code(bmi):
@@ -42,22 +77,120 @@ steps = [
 def index():
     return render_template('index.html')
 
-@app.route('/sign', methods=['GET', 'POST'])
-def sign():
-    if request.method == 'POST':
-        email = request.form.get('email')
-        password = request.form.get('pass')
+# ลงทะเบียน account ใหม่
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    if request.method == 'GET':
+        return render_template('sign.html')
 
-        # ตัวอย่าง: ตรวจสอบ username/password แบบฮาร์ดโค้ด
-        if email == 'user123@gmail.com' and password == '123456':
-            session['isLoggedIn'] = True
-            session['userEmail'] = email
-            return redirect(url_for('home')) # เปลี่ยนเป็นหน้า home
-        else:
-            flash('Email หรือ Password ไม่ถูกต้อง', 'error')
-            return render_template('sign.html')  # โหลดหน้าเดิมพร้อม error
+    data = request.form
+    first = data.get('first')
+    last = data.get('last')
+    email = data.get('email')
+    password = data.get('password')
+    birthday = data.get('birthday')  # format DD-MM-YYYY
 
-    return render_template('sign.html')
+    if not (email and password):
+        flash("Email and password required", "danger")
+        return redirect(url_for('register'))
+
+    # Check existing email
+    cur = mysql.connection.cursor()
+    cur.execute("SELECT UserID FROM Account WHERE Email=%s", (email,))
+    if cur.fetchone():
+        flash("Email already registered", "warning")
+        cur.close()
+        return redirect(url_for('register'))
+
+    # ใช้ flask_bcrypt เข้ารหัส
+    hashed = bcrypt.generate_password_hash(password).decode('utf-8')
+
+    # Insert
+    sql = """INSERT INTO Account (FirstName, LastName, Birthday, Email, Password, Role)
+             VALUES (%s, %s, %s, %s, %s, %s)"""
+    cur.execute(sql, (first, last, birthday, email, hashed, 'User'))
+    mysql.connection.commit()
+    cur.close()
+    flash("Registered successfully. Please login.", "success")
+    return redirect(url_for('login'))
+
+
+
+
+
+# Login โดยใช้ JSONWebToken (JWT) เข้ารหัสแบบ md5
+@app.route('/login', methods=['POST'])
+def login():
+    email = request.form['email']
+    password = request.form['password']
+
+    cur = mysql.connection.cursor()
+    cur.execute("SELECT UserID, Password FROM Account WHERE Email=%s", (email,))
+    user = cur.fetchone()
+    cur.close()
+
+    if user and bcrypt.check_password_hash(user[1], password):
+        flash("Login successful!", "success")
+        # ... set session ...
+    else:
+        flash("Invalid credentials", "danger")
+
+    return redirect(url_for('home'))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 @app.route('/home')
 def home():
@@ -266,4 +399,6 @@ def profile():
     return render_template('admin.html')    
 
 if __name__ == "__main__":
-    app.run(debug=True) # เปิด debug mode (ต้องปิดเมื่อ deploy จริง)
+    app.run(debug=True, # เปิด debug mode (ต้องปิดเมื่อ deploy จริง)
+            port=5000,
+            use_reloader=True) 

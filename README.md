@@ -27,11 +27,46 @@ pip install Flask
 pip freeze
 ```
 
+ติดตั้ง flask-mysqldb ใช้เชื่อม MySQL
+```bash
+pip install flask-mysqldb
+```
+  
+ติดตั้ง flask-jwt-extended หรือ PyJWT เพื่อ สร้าง/ตรวจ JWT  
+```bash  
+pip install flask-jwt-extended
+```  
+
+ติดตั้ง flask-bcrypt เพื่อ hash รหัสผ่าน  
+```bash  
+pip install flask-bcrypt
+```  
+ติดตั้ง PyJWT เพื่อสร้าง/ถอด JWT  
+```bash  
+pip install PyJWT
+```  
+ติดตั้ง python-dotenv เพื่อเก็บ config แบบปลอดภัยใน .env
+```bash
+pip install python-dotenv
+```  
+
 ติดตั้ง library อื่น ๆ ที่จำเป็น:
 ```bash
 pip install joblib
 pip install pandas
 pip install -U Flask-WTF
+```
+
+## วิธีใช้ไฟล์ SQL  
+วิธีที่ 1: ผ่าน phpMyAdmin  
+1. เข้า http://localhost/phpmyadmin  
+2. สร้างฐานข้อมูลชื่อ diabetes_db  
+3. ไปที่แท็บ “Import”  
+4. เลือกไฟล์ diabetes_db.sql  
+5. คลิก “Go”  
+วิธีที่ 2: ผ่าน Terminal  
+```bash
+mysql -u root -p < database/diabetes_db.sql
 ```
 
 ---
