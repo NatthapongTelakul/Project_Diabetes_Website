@@ -2,13 +2,14 @@ import os
 import joblib
 import pandas as pd
 import numpy as np
-from flask import Flask, render_template, request, redirect, url_for, flash, session, jsonify
+from flask import Flask, request, render_template, redirect, url_for, flash, session, jsonify
 
 from db_config import init_db
 from dotenv import load_dotenv
 from flask_bcrypt import Bcrypt
 from flask_jwt_extended import JWTManager
 from flask_mysqldb import MySQL
+from werkzeug.utils import secure_filename # สำหรับจัดการชื่อไฟล์ที่อัปโหลด
 
 from forms import (
     HighBPForm, HighCholForm, HeartForm, DiffWalkForm,
@@ -72,10 +73,73 @@ steps = [
     {"name": "model_choice", "form": ModelChoiceForm, "image": "model_choice.png"},
 ]
 
+ALLOWED_IMAGE_EXT = {'png','jpg','jpeg','webp'}
+UPLOAD_FOLDER_IMAGES = '/static/images/home'
+UPLOAD_FOLDER_MODELS = '/models'
+app.config['UPLOAD_FOLDER_IMAGES'] = UPLOAD_FOLDER_IMAGES
+app.config['UPLOAD_FOLDER_MODELS'] = UPLOAD_FOLDER_MODELS
+
+def allowed_file(filename, allowed_set):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in allowed_set
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 # เริ่มต้นการทำงานที่ index.html
 @app.route('/', methods=['GET', 'POST'])
 def index():
     return render_template('index.html')
+
+
+
+@app.route('/sign')
+def sign():
+    return render_template('sign.html')
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 # ลงทะเบียน account ใหม่
 @app.route('/register', methods=['GET', 'POST'])
@@ -88,7 +152,7 @@ def register():
     last = data.get('last')
     email = data.get('email')
     password = data.get('password')
-    birthday = data.get('birthday')  # format DD-MM-YYYY
+    birthday = data.get('birthday')  # format YYYY-MM-DD
 
     if not (email and password):
         flash("Email and password required", "danger")
@@ -118,24 +182,73 @@ def register():
 
 
 
-# Login โดยใช้ JSONWebToken (JWT) เข้ารหัสแบบ md5
-@app.route('/login', methods=['POST'])
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# Login โดยใช้ JSONWebToken (JWT) เข้ารหัสแบบ bcrypt
+@app.route('/login', methods=['GET', 'POST'])
 def login():
+    # ถ้าเป็นการเข้าหน้า login แบบ GET ให้แสดงหน้าเว็บ sign.html
+    if request.method == 'GET':
+        return render_template('sign.html')
+
+    # ถ้าเป็นการส่งข้อมูล login แบบ POST
     email = request.form['email']
     password = request.form['password']
 
+    print(f"Login attempt: {email} / {password}")
+
+    # ตรวจสอบว่ากรอกครบไหม
+    if not (email and password):
+        flash("Please fill in both email and password.", "warning")
+        return redirect(url_for('login'))
+
+    # สร้าง cursor เพื่อ query ข้อมูลจากฐานข้อมูล
     cur = mysql.connection.cursor()
-    cur.execute("SELECT UserID, Password FROM Account WHERE Email=%s", (email,))
+    cur.execute("SELECT UserID, FirstName, LastName, Email, Password, Role FROM Account WHERE Email=%s", (email,))
     user = cur.fetchone()
     cur.close()
 
-    if user and bcrypt.check_password_hash(user[1], password):
-        flash("Login successful!", "success")
-        # ... set session ...
-    else:
-        flash("Invalid credentials", "danger")
+    print(f"User from DB: {user}")
 
-    return redirect(url_for('home'))
+    # ตรวจสอบว่ามี email นี้ในระบบไหม
+    if user is None:
+        flash("Email not found. Please register first.", "danger")
+        return redirect(url_for('login'))
+
+
+    # ตรวจสอบรหัสผ่านที่ผู้ใช้กรอก กับรหัสผ่านที่ hash เก็บไว้ใน DB
+    # bcrypt.check_password_hash(รหัสที่เก็บใน DB, รหัสที่ผู้ใช้กรอก)
+    if bcrypt.check_password_hash(user['Password'], password):
+        # ถ้ารหัสผ่านถูกต้อง
+        session['user_id'] = user['UserID']
+        session['email'] = user['Email']
+        session['role'] = user['Role']
+        session['first_name'] = user['FirstName']
+
+        flash(f"Welcome back, {user['FirstName']}!", "success")
+
+        # แยกหน้าแสดงผลตาม Role
+        if user['Role'] == 'Admin':
+            return redirect(url_for('admin_dashboard'))  # ไปหน้า admin
+        else:
+            return redirect(url_for('home'))   # ไปหน้า user
+    else:
+        # ถ้ารหัสผ่านไม่ตรง
+        flash("Invalid password. Please try again.", "danger")
+        return redirect(url_for('login'))
 
 
 
@@ -393,6 +506,14 @@ def result():
 #     return render_template('predict.html', form=form,
 #                            prediction=session.get('prediction'),
 #                            probability=session.get('probability'))
+
+@app.route('/admin/dashboard')
+def admin_dashboard():
+    if 'user_id' not in session or session.get('role') != 'Admin':
+        flash("Unauthorized access", "danger")
+        return redirect(url_for('login'))
+    return render_template('admin_dashboard.html', name=session['first_name'])
+
 
 @app.route('/admin-contact')
 def profile():

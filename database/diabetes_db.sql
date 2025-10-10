@@ -19,7 +19,8 @@ CREATE TABLE Account (
 
 INSERT INTO Account (UserID, FirstName, LastName, Birthday, Email, Password, Role)
 VALUES
-    (1, "AdminFN", "AdminLN", to_date('02/12/2003','dd/mm/yyyy'), "AdminEmail@gmail.com", "Admin1234", "Admin");
+    (1, "AdminFN", "AdminLN", STR_TO_DATE('02/12/2003', '%d/%m/%Y'), "AdminEmail@gmail.com", "Admin1234", "Admin"),
+    (2, "UserFN", "UserLN", STR_TO_DATE('03/12/2003', '%d/%m/%Y'), "user123@gmail.com", "$2y$10$WNmnosqqy1iqkkLYW2RBmepvdRd05pnF5LvBde3DkOsaIc7Gn/gpW", "User");
 
 -- ตารางหมวดหมู่ความเสี่ยง
 CREATE TABLE Category (
