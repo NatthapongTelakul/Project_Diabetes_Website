@@ -1,43 +1,142 @@
 {% extends "header.html" %}
 {% block content %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/style-step.css') }}">
-<div class="step-wrap">
-  <h2>คำถามที่ {{ step }} / {{ total }}</h2>
 
-  <div class="card">
-    <div class="left">
-      {% if image %}
-        <img src="{{ url_for('static', filename='images/' + image) }}" alt="image step" />
-      {% endif %}
+<div class="step-container">
+    <!-- Progress Bar -->
+    <div class="progress-wrapper">
+        <div class="progress-bar">
+        <div class="progress-fill" style="width: {{ (step / total * 100)|round|int }}%"></div>
+        </div>
+        <div class="progress-text">
+        <span class="current-step">ขั้นตอนที่ {{ step }}</span>
+        <span class="total-steps">/ {{ total }}</span>
+        </div>
     </div>
-    <div class="right">
-      <form method="POST">
-        {{ form.hidden_tag() }}
-        <div class="form-row">
-          {# แสดงทุกฟิลด์ที่ไม่ใช่ submit/csrf #}
-          {% for fname, field in form._fields.items() %}
+
+    <div class="step-card">
+        <!-- Image Section - Now on Top -->
+        {% if image %}
+        <div class="image-section">
+        <img src="{{ url_for('static', filename='images/' + image) }}" alt="step illustration" />
+        </div>
+        {% endif %}
+
+        <!-- Form Section -->
+        <div class="form-section">
+        <form method="POST" id="stepForm">
+            {{ form.hidden_tag() }}
+            
+            {% for fname, field in form._fields.items() %}
             {% if fname != 'csrf_token' and fname != 'submit' %}
-              <label>{{ field.label }}</label>
-              <div class="input">
-                {{ field() }}
-                {% if field.errors %}
-                  <div class="errors">
-                    {% for e in field.errors %} <div>{{ e }}</div> {% endfor %}
-                  </div>
+                <div class="form-group">
+                <label class="form-label">{{ field.label.text }}</label>
+                
+                {# Radio Field - Button Style #}
+                {% if field.type == 'RadioField' %}
+                    <div class="radio-buttons">
+                    {% for value, label in field.choices %}
+                        <input type="radio" id="{{ fname }}_{{ value }}" name="{{ fname }}" value="{{ value }}" 
+                            {% if field.data == value %}checked{% endif %}>
+                        <label for="{{ fname }}_{{ value }}" class="radio-btn {% if value == '1' %}btn-yes{% else %}btn-no{% endif %}">
+                        {{ label }}
+                        </label>
+                    {% endfor %}
+                    </div>
+                
+                {# Select Field - Card Style #}
+                {% elif field.type == 'SelectField' %}
+                    <div class="select-cards">
+                    {% for value, label in field.choices %}
+                        <input type="radio" id="{{ fname }}_{{ value }}" name="{{ fname }}" value="{{ value }}" 
+                            {% if field.data == value %}checked{% endif %}>
+                        <label for="{{ fname }}_{{ value }}" class="select-card">
+                        <span class="card-label">{{ label }}</span>
+                        </label>
+                    {% endfor %}
+                    </div>
+                
+                {# Integer Field - Modern Input with Range Slider #}
+                {% elif field.type == 'IntegerField' %}
+                    <div class="input-group">
+                    {% if fname == 'height' or fname == 'weight' %}
+                        <div class="slider-container">
+                        <input type="range" 
+                                id="{{ fname }}_slider" 
+                                min="{{ field.validators[1].min }}" 
+                                max="{{ field.validators[1].max }}" 
+                                value="{{ field.data or field.validators[1].min }}"
+                                class="range-slider">
+                        <input type="number" 
+                                id="{{ fname }}" 
+                                name="{{ fname }}" 
+                                class="number-input"
+                                min="{{ field.validators[1].min }}" 
+                                max="{{ field.validators[1].max }}" 
+                                value="{{ field.data or '' }}"
+                                placeholder="0">
+                        <span class="unit">{% if fname == 'height' %}cm{% else %}kg{% endif %}</span>
+                        </div>
+                    {% else %}
+                        <input type="number" 
+                            id="{{ fname }}" 
+                            name="{{ fname }}" 
+                            class="number-input-simple"
+                            min="0" 
+                            max="30" 
+                            value="{{ field.data if field.data is not none else '' }}"
+                            placeholder="ใส่จำนวนวัน (0-30)">
+                    {% endif %}
+                    </div>
                 {% endif %}
-              </div>
-            {% endif %}
-          {% endfor %}
-        </div>
 
-        <div class="actions">
-          {% if step > 1 %}
-            <a class="btn back" href="{{ url_for('predict_step', step=step-1) }}">ย้อนกลับ</a>
-          {% endif %}
-          {{ form.submit(class="btn next") }}
+                {% if field.errors %}
+                    <div class="error-message">
+                    {% for error in field.errors %}
+                        <span>{{ error }}</span>
+                    {% endfor %}
+                    </div>
+                {% endif %}
+                </div>
+            {% endif %}
+            {% endfor %}
+
+            <!-- Action Buttons -->
+            <div class="action-buttons">
+            {% if step > 1 %}
+                <a href="{{ url_for('predict_step', step=step-1) }}" class="btn btn-back">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M19 12H5M12 19l-7-7 7-7"/>
+                </svg>
+                ย้อนกลับ
+                </a>
+            {% endif %}
+            {{ form.submit(class="btn btn-next") }}
+            </div>
+        </form>
         </div>
-      </form>
     </div>
-  </div>
 </div>
+
+
+<script>
+// Sync range slider with number input
+document.querySelectorAll('.range-slider').forEach(slider => {
+  const inputId = slider.id.replace('_slider', '');
+  const numberInput = document.getElementById(inputId);
+  
+  slider.addEventListener('input', (e) => {
+    numberInput.value = e.target.value;
+  });
+  
+  numberInput.addEventListener('input', (e) => {
+    slider.value = e.target.value;
+  });
+  
+  // Initialize slider value
+  if (numberInput.value) {
+    slider.value = numberInput.value;
+  }
+});
+</script>
 {% endblock %}

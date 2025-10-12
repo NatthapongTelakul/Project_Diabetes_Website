@@ -1,28 +1,28 @@
 from flask_wtf import FlaskForm
 from wtforms import RadioField, IntegerField, SelectField, SubmitField
-from wtforms.validators import DataRequired, NumberRange
+from wtforms.validators import DataRequired, InputRequired, NumberRange
 
 class HighBPForm(FlaskForm):
-    highbp = RadioField("คุณเคยมีความดันโลหิตสูงหรือไม่?",
-                        choices=[("0","ไม่เคย"), ("1","เคย")],
+    highbp = RadioField("คุณมีความดันโลหิตสูงหรือไม่?",
+                        choices=[("0","ไม่"), ("1","ใช่")],
                         validators=[DataRequired()])
     submit = SubmitField("Next")
 
 class HighCholForm(FlaskForm):
-    highchol = RadioField("คุณเคยมีคอเลสเตอรอลสูงหรือไม่?",
-                          choices=[("0","ไม่เคย"), ("1","เคย")],
+    highchol = RadioField("คุณมีคอเลสเตอรอลสูงหรือไม่?",
+                          choices=[("0","ไม่"), ("1","ใช่")],
                           validators=[DataRequired()])
     submit = SubmitField("Next")
 
 class HeartForm(FlaskForm):
     heart = RadioField("คุณเคยมีโรคหัวใจหรือไม่?",
-                       choices=[("0","ไม่เคย"), ("1","เคย")],
+                       choices=[("0","ไม่"), ("1","ใช่")],
                        validators=[DataRequired()])
     submit = SubmitField("Next")
 
 class DiffWalkForm(FlaskForm):
     diffwalk = RadioField("คุณมีปัญหาในการเดินหรือไม่?",
-                          choices=[("0","ไม่มี"), ("1","มี")],
+                          choices=[("0","ไม่"), ("1","ใช่")],
                           validators=[DataRequired()])
     submit = SubmitField("Next")
 
@@ -41,7 +41,10 @@ class GenHlthForm(FlaskForm):
 
 class PhyshlthForm(FlaskForm):
     physhlth = IntegerField("จำนวนวันในเดือนที่แล้วที่สุขภาพกายไม่ดี (0-30)",
-                            validators=[DataRequired(), NumberRange(min=0, max=30)]) # ใส่เลข 0 ไม่ได้
+                            validators=[
+                                InputRequired(message="กรุณากรอกจำนวนวัน"),
+                                NumberRange(min=0, max=30, message="กรุณากรอกตัวเลขระหว่าง 0 ถึง 30")
+                            ])
     submit = SubmitField("Next")
 
 class AgeForm(FlaskForm):
