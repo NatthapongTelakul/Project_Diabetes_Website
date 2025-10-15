@@ -69,6 +69,20 @@ pip install -U Flask-WTF
 mysql -u root -p < database/diabetes_db.sql
 ```
 
+## กรุณาสร้างไฟล์ .env ที่มีข้อมูลดังนี้ ใน directory ระดับเดียวกับ app.py
+```bash
+# ----- Flask Environment -----
+FLASK_ENV=production
+SECRET_KEY=your_secret_key
+
+# ----- MySQL Database -----
+MYSQL_HOST=localhost
+MYSQL_USER=root
+MYSQL_PASSWORD=your_mysql_password
+MYSQL_DB=diabetes_db
+```
+
+
 ---
 
 ## วิธีรัน Project

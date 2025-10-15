@@ -7,7 +7,6 @@ from flask import Flask, request, render_template, redirect, url_for, flash, ses
 from db_config import init_db
 from dotenv import load_dotenv
 from flask_bcrypt import Bcrypt
-from flask_jwt_extended import JWTManager
 from flask_mysqldb import MySQL
 from werkzeug.utils import secure_filename # สำหรับจัดการชื่อไฟล์ที่อัปโหลด
 
@@ -32,19 +31,9 @@ app.config['MYSQL_USER'] = os.getenv('MYSQL_USER')
 app.config['MYSQL_PASSWORD'] = os.getenv('MYSQL_PASSWORD')
 app.config['MYSQL_DB'] = os.getenv('MYSQL_DB')
 
-# Cookie / CSRF related
-app.config['JWT_ACCESS_TOKEN_EXPIRES'] = 900  # 15 minutes
-app.config['JWT_REFRESH_TOKEN_EXPIRES'] = 60*60*24*7  # 7 days
-
 # เริ่มต้นใช้งานส่วนเสริม
 mysql = MySQL(app)
 bcrypt = Bcrypt(app)
-jwt = JWTManager(app)
-
-# ทดลองใช้งาน JWT
-@jwt.invalid_token_loader
-def invalid_token_callback(error):
-    return {'error': 'Invalid token'}, 401
 
 # เรียกใช้การเชื่อมต่อ DB
 mysql = init_db(app)
@@ -73,8 +62,8 @@ steps = [
     {"name": "model_choice", "form": ModelChoiceForm, "image": "model_choice.png"},
 ]
 
-ALLOWED_IMAGE_EXT = {'png','jpg','jpeg','webp'}
-UPLOAD_FOLDER_IMAGES = '/static/images/home'
+ALLOWED_IMAGE_EXT = {'png','jpg','jpeg'}
+UPLOAD_FOLDER_IMAGES = '/static/images/ProfileImage'
 UPLOAD_FOLDER_MODELS = '/models'
 app.config['UPLOAD_FOLDER_IMAGES'] = UPLOAD_FOLDER_IMAGES
 app.config['UPLOAD_FOLDER_MODELS'] = UPLOAD_FOLDER_MODELS
@@ -82,64 +71,14 @@ app.config['UPLOAD_FOLDER_MODELS'] = UPLOAD_FOLDER_MODELS
 def allowed_file(filename, allowed_set):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in allowed_set
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 # เริ่มต้นการทำงานที่ index.html
 @app.route('/', methods=['GET', 'POST'])
 def index():
     return render_template('index.html')
 
-
-
 @app.route('/sign')
 def sign():
     return render_template('sign.html')
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 # ลงทะเบียน account ใหม่
 @app.route('/register', methods=['GET', 'POST'])
@@ -148,11 +87,42 @@ def register():
         return render_template('sign.html')
 
     data = request.form
-    first = data.get('first')
-    last = data.get('last')
+    first = data.get('firstname')
+    last = data.get('lastname')
     email = data.get('email')
     password = data.get('password')
     birthday = data.get('birthday')  # format YYYY-MM-DD
+
+
+
+
+
+
+
+
+
+
+
+    # จัดการไฟล์รูปภาพโปรไฟล์
+    profile_image_path = None
+    if 'profile_image' in request.files:
+        file = request.files['profile_image']
+        if file and file.filename != '' and allowed_file(file.filename, ALLOWED_IMAGE_EXT):
+            filename = secure_filename(file.filename)
+            # เพิ่ม timestamp เพื่อป้องกันชื่อไฟล์ซ้ำ
+            import time
+            timestamp = str(int(time.time()))
+            name, ext = os.path.splitext(filename)
+            unique_filename = f"{name}_{timestamp}{ext}"
+            
+            # บันทึกไฟล์
+            upload_path = os.path.join(app.root_path, 'static', 'images', 'ProfileImage')
+            if not os.path.exists(upload_path):
+                os.makedirs(upload_path)
+            
+            file.save(os.path.join(upload_path, unique_filename))
+            # เก็บ path สำหรับใช้ใน database
+            profile_image_path = f"/static/images/ProfileImage/{unique_filename}"
 
     if not (email and password):
         flash("Email and password required", "danger")
@@ -169,20 +139,20 @@ def register():
     # ใช้ flask_bcrypt เข้ารหัส
     hashed = bcrypt.generate_password_hash(password).decode('utf-8')
 
-    # Insert
-    sql = """INSERT INTO Account (FirstName, LastName, Birthday, Email, Password, Role)
-             VALUES (%s, %s, %s, %s, %s, %s)"""
-    cur.execute(sql, (first, last, birthday, email, hashed, 'User'))
+    # Insert พร้อม ProfileImage
+    if profile_image_path:
+        sql = """INSERT INTO Account (FirstName, LastName, Birthday, Email, Password, Role, ProfileImage)
+                 VALUES (%s, %s, %s, %s, %s, %s, %s)"""
+        cur.execute(sql, (first, last, birthday, email, hashed, 'User', profile_image_path))
+    else:
+        sql = """INSERT INTO Account (FirstName, LastName, Birthday, Email, Password, Role)
+                 VALUES (%s, %s, %s, %s, %s, %s)"""
+        cur.execute(sql, (first, last, birthday, email, hashed, 'User'))
+    
     mysql.connection.commit()
     cur.close()
     flash("Registered successfully. Please login.", "success")
     return redirect(url_for('login'))
-
-
-
-
-
-
 
 
 
@@ -208,8 +178,6 @@ def login():
     email = request.form['email']
     password = request.form['password']
 
-    print(f"Login attempt: {email} / {password}")
-
     # ตรวจสอบว่ากรอกครบไหม
     if not (email and password):
         flash("Please fill in both email and password.", "warning")
@@ -220,8 +188,6 @@ def login():
     cur.execute("SELECT UserID, FirstName, LastName, Email, Password, Role FROM Account WHERE Email=%s", (email,))
     user = cur.fetchone()
     cur.close()
-
-    print(f"User from DB: {user}")
 
     # ตรวจสอบว่ามี email นี้ในระบบไหม
     if user is None:
@@ -237,8 +203,6 @@ def login():
         session['email'] = user['Email']
         session['role'] = user['Role']
         session['first_name'] = user['FirstName']
-
-        flash(f"Welcome back, {user['FirstName']}!", "success")
 
         # แยกหน้าแสดงผลตาม Role
         if user['Role'] == 'Admin':

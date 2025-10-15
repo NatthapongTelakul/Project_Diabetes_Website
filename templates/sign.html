@@ -17,37 +17,31 @@
     </div>
   </header>
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
   <!-- หน้า Sign in -->
   <main>
     <div class="left-side">
       <div class="login-form">
         <h2>Welcome Back</h2>
 
-        <form id="signin-form" method="POST" action="/login">
+        <!-- ส่วนแสดง Flash Message -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            {% for category, message in messages %}
+              <div class="flash-message {{ category }}">
+                {{ message }}
+              </div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+        <!-- จบส่วน flash -->
+
+        <!-- method="POST" คือการส่งข้อมูล และ action="/login" คือ API ที่ใช้ -->
+        <form id="signin-form" method="POST" action="/login">   
           <div class="form-group">
             <div class="form-icon">
               <i class="zmdi zmdi-email"></i>
             </div>
+            <!-- ส่ง email ไป app.py โดยระบุที่ name="email" -->
             <input type="email" name="email" id="email" required />
             <label for="email" class="floating-label">Email</label>
           </div>
@@ -58,12 +52,16 @@
             </div>
             <input type="password" name="password" id="pass" required />
             <label for="pass" class="floating-label">Password</label>
+            <!-- ปุ่มแสดง/ซ่อนรหัสผ่าน -->
+            <button type="button" class="toggle-password" onclick="togglePasswordSignin()">
+              <i class="zmdi zmdi-eye" id="eye-icon"></i>
+            </button>
           </div>
 
-          <div class="options">
+          <!-- <div class="options">
             <label><input type="checkbox" /> Remember me</label>
             <a href="#">Forgot Password?</a>
-          </div>
+          </div> -->
           <button type="submit">Sign In</button>
         </form>
 
@@ -71,26 +69,9 @@
         <div class="signup-link">
           <p>Don't have an account yet? <a href="#" id="signup-link">Sign Up</a></p>
         </div>
-        <a class="admin-link" href="#">Sign In as Admin</a>
+        <!-- <a class="admin-link" href="#">Sign In as Admin</a> -->
       </div>
     </div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -98,21 +79,61 @@
     <div class="right-side">
       <div class="signup-form">
         <h2>Create your account</h2>
-        <form>
+
+        <!-- ส่วนแสดง Flash Message -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            {% for category, message in messages %}
+              <div class="flash-message {{ category }}">
+                {{ message }}
+              </div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+        <!-- จบส่วน flash -->
+        
+        <!-- เพิ่ม enctype สำหรับ upload รูปภาพ -->
+        <form method="POST" action="/register" enctype="multipart/form-data">
+
+          <!-- Upload Profile Image -->
+          <div class="upload-container">
+            <img id="preview" class="profile-preview" alt="Profile Preview">
+            <label for="profile_image" class="upload-label">
+              <i class="zmdi zmdi-camera"></i>
+              Upload Profile Picture
+            </label>
+            <input type="file" name="profile_image" id="profile_image" accept="image/png,image/jpeg,image/jpg" onchange="previewImage(event)">
+          </div>
+
+          <!-- Firstname และ Lastname อยู่บรรทัดเดียวกัน -->
+          <div class="form-row">
+            <div class="form-group">
+              <div class="form-icon">
+                <i class="zmdi zmdi-account"></i>
+              </div>
+              <input type="text" name="firstname" id="firstname" required />
+              <label for="firstname" class="floating-label">First Name</label>
+            </div>
+
+            <div class="form-group">
+              <div class="form-icon">
+                <i class="zmdi zmdi-account"></i>
+              </div>
+              <input type="text" name="lastname" id="lastname" required />
+              <label for="lastname" class="floating-label">Last Name</label>
+            </div>
+          </div>
+
+          <!-- Birthday with Date Picker -->
           <div class="form-group">
             <div class="form-icon">
-              <i class="zmdi zmdi-account"></i>
+              <i class="zmdi zmdi-calendar"></i>
             </div>
-            <input type="text" name="username" id="username" required />
-            <label for="username" class="floating-label">Username</label>
+            <input type="date" name="birthday" id="birthday" required max="" />
+            <label for="birthday" class="floating-label">Birthday</label>
           </div>
-          <div class="form-group">
-            <div class="form-icon">
-              <i class="zmdi zmdi-lock"></i>
-            </div>
-            <input type="password" name="password_register" id="password" required />
-            <label for="password" class="floating-label">Password</label>
-          </div>
+
+          <!-- รับ email -->
           <div class="form-group">
             <div class="form-icon">
               <i class="zmdi zmdi-email"></i>
@@ -120,7 +141,23 @@
             <input type="email" name="email" id="email-signup" required />
             <label for="email-signup" class="floating-label">Email</label>
           </div>
+
+          <!-- รับ password -->
+          <div class="form-group">
+            <div class="form-icon">
+              <i class="zmdi zmdi-lock"></i>
+            </div>
+            <input type="password" name="password" id="password-signup" required />
+            <label for="password-signup" class="floating-label">Password</label>
+            <!-- ปุ่มแสดง/ซ่อนรหัสผ่าน -->
+            <button type="button" class="toggle-password" onclick="togglePasswordSignup()">
+              <i class="zmdi zmdi-eye" id="eye-icon-signup"></i>
+            </button>
+          </div>
+
+          <!-- ปุ่ม Sign Up -->
           <button type="submit">Sign Up</button>
+        
         </form>
 
         <div class="signin-link">
@@ -132,7 +169,12 @@
     <div class="overlay"></div>
   </main>
 
+
   <script>
+    // ตั้งค่าวันที่สูงสุดเป็นวันนี้ (ไม่ให้เลือกวันในอนาคต)
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('birthday').setAttribute('max', today);
+
     document.getElementById('signup-link').addEventListener('click', function(e) {
       e.preventDefault();
       document.body.classList.add('signup-mode');
@@ -143,6 +185,52 @@
       document.body.classList.remove('signup-mode');
     });
 
+        // ฟังก์ชันสำหรับแสดง/ซ่อนรหัสผ่าน - Sign In
+    function togglePasswordSignin() {
+      const passwordInput = document.getElementById('pass');
+      const eyeIcon = document.getElementById('eye-icon-signin');
+      
+      if (passwordInput.type === 'password') {
+        passwordInput.type = 'text';
+        eyeIcon.classList.remove('zmdi-eye');
+        eyeIcon.classList.add('zmdi-eye-off');
+      } else {
+        passwordInput.type = 'password';
+        eyeIcon.classList.remove('zmdi-eye-off');
+        eyeIcon.classList.add('zmdi-eye');
+      }
+    }
+
+    // ฟังก์ชันสำหรับแสดง/ซ่อนรหัสผ่าน - Sign Up
+    function togglePasswordSignup() {
+      const passwordInput = document.getElementById('password-signup');
+      const eyeIcon = document.getElementById('eye-icon-signup');
+      
+      if (passwordInput.type === 'password') {
+        passwordInput.type = 'text';
+        eyeIcon.classList.remove('zmdi-eye');
+        eyeIcon.classList.add('zmdi-eye-off');
+      } else {
+        passwordInput.type = 'password';
+        eyeIcon.classList.remove('zmdi-eye-off');
+        eyeIcon.classList.add('zmdi-eye');
+      }
+    }
+
+    // ฟังก์ชันแสดงตัวอย่างรูปภาพโปรไฟล์
+    function previewImage(event) {
+      const preview = document.getElementById('preview');
+      const file = event.target.files[0];
+      
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          preview.src = e.target.result;
+          preview.style.display = 'block';
+        }
+        reader.readAsDataURL(file);
+      }
+    }
   </script>
   
 </body>
