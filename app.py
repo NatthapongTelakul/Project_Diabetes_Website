@@ -157,7 +157,7 @@ def register():
 
 
 
-# Login โดยใช้ JSONWebToken (JWT) เข้ารหัสแบบ bcrypt
+# Login เข้ารหัส Password แบบ bcrypt
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     # ถ้าเป็นการเข้าหน้า login แบบ GET ให้แสดงหน้าเว็บ sign.html
