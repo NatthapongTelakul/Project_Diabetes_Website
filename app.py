@@ -93,16 +93,6 @@ def register():
     password = data.get('password')
     birthday = data.get('birthday')  # format YYYY-MM-DD
 
-
-
-
-
-
-
-
-
-
-
     # จัดการไฟล์รูปภาพโปรไฟล์
     profile_image_path = None
     if 'profile_image' in request.files:
