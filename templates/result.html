@@ -1,33 +1,317 @@
 {% extends "header.html" %}
 {% block content %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/style-result.css') }}">
-<div class="result-card">
-  <h2>ผลการประเมิน</h2>
-  <p>BMI: <strong>{{ bmi }}</strong></p>
-  <p>ความน่าจะเป็น: 
-    {% if probability is not none %}
-      <strong>{{ probability }}%</strong>
-    {% else %}
-      <em>(ไม่สามารถคำนวณความน่าจะเป็นได้)</em>
-    {% endif %}
-  </p>
 
-  <p>คำตอบ: 
-  {% if prediction == 1 %}
-    <span class="bad">เป็นเบาหวาน</span>
-  {% else %}
-    <span class="good">ไม่เป็นเบาหวาน</span>
-  {% endif %}
-  </p>
+<div class="result-container">
+    <!-- Header Section -->
+    <div class="result-header">
+        <h1>ผลการประเมิน</h1>
+        <p>{{ prediction_datetime.strftime('%d %B %Y, %H:%M') if prediction_datetime else '' }}</p>
+    </div>
 
-  <hr>
-  <h3>ข้อมูลที่กรอก</h3>
-  <ul>
-    {% for k,v in data.items() %}
-      <li>{{ k }} : {{ v }}</li>
-    {% endfor %}
-  </ul>
+    <!-- Risk Result Card -->
+    <div class="risk-card">
+        <div class="risk-indicator">
+            {% if probability is not none %}
+                {% set risk_pct = probability %}
+                {% if risk_pct < 50 %}
+                    {% set risk_level = "ความเสี่ยงต่ำที่สุด" %}
+                    {% set risk_color = "green" %}
+                    {% set risk_icon = "✓" %}
+                {% elif risk_pct < 60 %}
+                    {% set risk_level = "ความเสี่ยงต่ำ" %}
+                    {% set risk_color = "green-dark" %}
+                    {% set risk_icon = "✓" %}
+                {% elif risk_pct < 70 %}
+                    {% set risk_level = "ความเสี่ยงปานกลาง" %}
+                    {% set risk_color = "yellow" %}
+                    {% set risk_icon = "!" %}
+                {% elif risk_pct < 90 %}
+                    {% set risk_level = "ความเสี่ยงมาก" %}
+                    {% set risk_color = "orange" %}
+                    {% set risk_icon = "!" %}
+                {% else %}
+                    {% set risk_level = "ความเสี่ยงมากที่สุด" %}
+                    {% set risk_color = "red" %}
+                    {% set risk_icon = "!" %}
+                {% endif %}
+            {% else %}
+                {% set risk_pct = 0 %}
+                {% set risk_level = "ไม่สามารถประเมินได้" %}
+                {% set risk_color = "gray" %}
+                {% set risk_icon = "?" %}
+            {% endif %}
 
-  <a class="btn" href="{{ url_for('predict_step', step=1) }}">ทำแบบประเมินใหม่</a>
+            <div class="risk-circle risk-circle-{{ risk_color }}">
+                <span class="risk-icon">{{ risk_icon }}</span>
+            </div>
+        </div>
+
+        <div class="risk-content">
+            <h2>{{ risk_level }}</h2>
+            <div class="probability-display">
+                <span class="probability-label">ความเสี่ยงเบาหวาน:</span>
+                <span class="probability-value">{{ "%.2f"|format(risk_pct) }}%</span>
+            </div>
+            
+            <!-- Risk Meter -->
+            <div class="risk-meter">
+                <div class="meter-track">
+                    <div class="meter-fill" style="width: {{ risk_pct }}%; background: 
+                        {% if risk_pct < 50 %}linear-gradient(90deg, #10b981 0%, #059669 100%)
+                        {% elif risk_pct < 60 %}linear-gradient(90deg, #10b981 0%, #059669 100%)
+                        {% elif risk_pct < 70 %}linear-gradient(90deg, #eab308 0%, #ca8a04 100%)
+                        {% elif risk_pct < 90 %}linear-gradient(90deg, #f97316 0%, #ea580c 100%)
+                        {% else %}linear-gradient(90deg, #ef4444 0%, #dc2626 100%)
+                        {% endif %};">
+                    </div>
+                </div>
+                <div class="meter-labels">
+                    <span>0%</span>
+                    <span>25%</span>
+                    <span>50%</span>
+                    <span>75%</span>
+                    <span>100%</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Summary Section -->
+    <div class="summary-section">
+        <h3>สรุปข้อมูลของคุณ</h3>
+        
+        <div class="summary-grid">
+            <!-- Physical Metrics -->
+            <div class="summary-group">
+                <h4>ข้อมูลทางกายภาพ</h4>
+                <div class="summary-items">
+                    {% if data.get('height') %}
+                        <div class="summary-item">
+                            <span class="label">ส่วนสูง:</span>
+                            <span class="value">{{ data.get('height') }} ซม</span>
+                        </div>
+                    {% endif %}
+                    {% if data.get('weight') %}
+                        <div class="summary-item">
+                            <span class="label">น้ำหนัก:</span>
+                            <span class="value">{{ data.get('weight') }} กก</span>
+                        </div>
+                    {% endif %}
+                    {% if bmi %}
+                        <div class="summary-item">
+                            <span class="label">ดัชนีมวลกาย (BMI):</span>
+                            <span class="value">{{ bmi }} kg/m²
+                                {% if bmi < 18.5 %}
+                                    <span class="bmi-status">(ต่ำกว่าปกติ)</span>
+                                {% elif bmi < 25 %}
+                                    <span class="bmi-status green">(ปกติ)</span>
+                                {% elif bmi < 30 %}
+                                    <span class="bmi-status yellow">(น้ำหนักเกิน)</span>
+                                {% else %}
+                                    <span class="bmi-status red">(อ้วน)</span>
+                                {% endif %}
+                            </span>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Health Conditions -->
+            <div class="summary-group">
+                <h4>สภาวะสุขภาพ</h4>
+                <div class="summary-items">
+                    <div class="summary-item">
+                        <span class="label">ความดันโลหิตสูง:</span>
+                        <span class="value">{% if data.get('highbp') == '1' %}ใช่{% else %}ไม่{% endif %}</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="label">คอเลสเตอรอลสูง:</span>
+                        <span class="value">{% if data.get('highchol') == '1' %}ใช่{% else %}ไม่{% endif %}</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="label">โรคหัวใจ:</span>
+                        <span class="value">{% if data.get('heart') == '1' %}ใช่{% else %}ไม่{% endif %}</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="label">ปัญหาในการเดิน:</span>
+                        <span class="value">{% if data.get('diffwalk') == '1' %}ใช่{% else %}ไม่{% endif %}</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- General Health -->
+            <div class="summary-group">
+                <h4>สุขภาพโดยทั่วไป</h4>
+                <div class="summary-items">
+                    <div class="summary-item">
+                        <span class="label">สถานะสุขภาพ:</span>
+                        <span class="value">
+                            {% if data.get('genhlth') == '1' %}ยอดเยี่ยม
+                            {% elif data.get('genhlth') == '2' %}ดี
+                            {% elif data.get('genhlth') == '3' %}ปานกลาง
+                            {% elif data.get('genhlth') == '4' %}แย่
+                            {% elif data.get('genhlth') == '5' %}แย่มาก
+                            {% else %}ไม่ระบุ{% endif %}
+                        </span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="label">วันที่สุขภาพไม่ดี:</span>
+                        <span class="value">{{ data.get('physhlth', '0') }} วัน/เดือน</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="label">กลุ่มอายุ:</span>
+                        <span class="value">
+                            {% set age_labels = {
+                                '1': '18-24 ปี',
+                                '2': '25-29 ปี',
+                                '3': '30-34 ปี',
+                                '4': '35-39 ปี',
+                                '5': '40-44 ปี',
+                                '6': '45-49 ปี',
+                                '7': '50-54 ปี',
+                                '8': '55-59 ปี',
+                                '9': '60-64 ปี',
+                                '10': '65-69 ปี',
+                                '11': '70-74 ปี',
+                                '12': '75-79 ปี',
+                                '13': '80+ ปี'
+                            } %}
+                            {{ age_labels.get(data.get('age', '1'), 'ไม่ระบุ') }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recommendation Section -->
+    <div class="recommendation-section">
+        <h3>คำแนะนำการดูแลสุขภาพ</h3>
+        <div class="recommendation-card recommendation-{{ risk_color }}">
+            {% if probability is not none %}
+                {% if probability < 50 %}
+                    <div class="rec-content">
+                        <h4>ความเสี่ยงต่ำที่สุด</h4>
+                        <p><strong>อาหาร:</strong> ปลูกผักกินเอง งดน้ำอัดลม รับประทานผลไม้รสไม่หวานจัด หลีกเลี่ยงหอยนางรม หมึก กุ้งตัวใหญ่ เนื้อสัตว์ติดมัน ลดการบริโภคผงชูรส ลดดื่มกาแฟสำเร็จรูป</p>
+                        <p><strong>ออกกำลังกาย:</strong> ออกกำลังกายอย่างสม่ำเสมอ อย่างน้อยสัปดาห์ละ 3 วัน วันละ 30 นาที</p>
+                        <p><strong>การติดตาม:</strong> ตรวจสุขภาพอย่างน้อยปีละ 1 ครั้ง</p>
+                    </div>
+                {% elif probability < 60 %}
+                    <div class="rec-content">
+                        <h4>ความเสี่ยงต่ำ</h4>
+                        <p><strong>อาหาร:</strong> รับประทานข้าวไม่ขัดสี ผักวันละ 3 ทัพพี ผลไม้ที่ไม่หวานจัด ลดเนื้อสัตว์ที่ติดมัน</p>
+                        <p><strong>ออกกำลังกาย:</strong> ออกกำลังกายอย่างสม่ำเสมอ อย่างน้อยสัปดาห์ละ 3 วัน วันละ 30 นาที</p>
+                        <p><strong>การติดตาม:</strong> นัดพบแพทย์ทุก 3 เดือน</p>
+                    </div>
+                {% elif probability < 70 %}
+                    <div class="rec-content">
+                        <h4>ความเสี่ยงปานกลาง</h4>
+                        <p><strong>อาหาร:</strong> รับประทานข้าวไม่ขัดสี ผักวันละ 3 ทัพพี ลดการบริโภคน้ำตาล ลดเนื้อสัตว์ที่ติดมัน</p>
+                        <p><strong>ออกกำลังกาย:</strong> ออกกำลังกายอย่างสม่ำเสมอ อย่างน้อยสัปดาห์ละ 3 วัน</p>
+                        <p><strong>การติดตาม:</strong> นัดพบแพทย์ทุก 1 เดือน</p>
+                    </div>
+                {% elif probability < 90 %}
+                    <div class="rec-content">
+                        <h4>ความเสี่ยงมาก</h4>
+                        <p><strong>อาหาร:</strong> รับประทานข้าวไม่ขัดสี ลดผลไม้เป็น 2-3 ส่วน/วัน ดื่มนมจืดพร่องมันเนย วันละ 3 แก้ว</p>
+                        <p><strong>ออกกำลังกาย:</strong> ออกกำลังกายอย่างสม่ำเสมอ วัดความดันและตรวจระดับน้ำตาลทุก 1-3 เดือน</p>
+                        <p><strong>การติดตาม:</strong> พบแพทย์ทุก 1 เดือนหรือเมื่อมีอาการผิดปกติ</p>
+                    </div>
+                {% else %}
+                    <div class="rec-content">
+                        <h4>ความเสี่ยงมากที่สุด</h4>
+                        <p><strong>อาหาร:</strong> รับประทานข้าวไม่ขัดสี ผักวันละ 3 ทัพพี ลดผลไม้เป็น 2-3 ส่วน/วัน ดื่มนมจืดพร่องมันเนย วันละ 1 แก้ว</p>
+                        <p><strong>ออกกำลังกาย:</strong> ออกกำลังกายอย่างสม่ำเสมอ ควบคุมน้ำหนักตามคำแนะนำของแพทย์</p>
+                        <p><strong>การติดตาม:</strong> พบแพทย์ทุก 2-4 สัปดาห์ และติดตามเยี่ยมบ้าน ตรวจภาวะแทรกซ้อน</p>
+                    </div>
+                {% endif %}
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Notes Section -->
+    <div class="notes-section">
+        <h3>บันทึกเพิ่มเติม (เลือกได้)</h3>
+        <form method="POST" action="{{ url_for('save_result') }}" id="saveResultForm">
+            <div class="form-group">
+                <textarea id="userNote" name="userNote" class="user-note-input" 
+                          placeholder="เขียนบันทึกหรือความคิดเห็นของคุณเกี่ยวกับผลประเมิน..." 
+                          maxlength="500"></textarea>
+                <div class="char-count">
+                    <span id="charCount">0</span>/500
+                </div>
+            </div>
+
+            <!-- Hidden fields to store data -->
+            <input type="hidden" name="prediction" value="{{ prediction }}">
+            <input type="hidden" name="probability" value="{{ probability }}">
+            <input type="hidden" name="bmi" value="{{ bmi }}">
+            <input type="hidden" name="model_used" value="{{ data.get('model_choice', 'random_forest') }}">
+            
+            <div class="action-buttons">
+                <a href="{{ url_for('predict_step', step=1) }}" class="btn btn-start-over">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="1 4 1 10 7 10"></polyline>
+                        <path d="M3.51 15a9 9 0 0 1 14.85-4.95M23 20v-6h-6"></path>
+                        <polyline points="23 14 17 20 23 20"></polyline>
+                        <path d="M20.49 9A9 9 0 0 0 5.64 13.05"></path>
+                    </svg>
+                    ประเมินใหม่
+                </a>
+                <button type="submit" class="btn btn-save">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+                        <polyline points="17 21 17 13 7 13 7 21"></polyline>
+                        <polyline points="7 3 7 8 15 8"></polyline>
+                    </svg>
+                    บันทึกผลการประเมิน
+                </button>
+            </div>
+        </form>
+    </div>
 </div>
+
+<script>
+    // Update character count
+    document.getElementById('userNote').addEventListener('input', function() {
+        document.getElementById('charCount').textContent = this.value.length;
+    });
+
+    // Handle form submission
+    document.getElementById('saveResultForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const formData = new FormData(this);
+        const btn = this.querySelector('button[type="submit"]');
+        btn.disabled = true;
+        btn.textContent = 'กำลังบันทึก...';
+        
+        fetch("{{ url_for('save_result') }}", {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('บันทึกผลการประเมินเรียบร้อยแล้ว ✓');
+                // Redirect to home or history page after 1 second
+                setTimeout(() => {
+                    window.location.href = "{{ url_for('home') }}";
+                }, 1000);
+            } else {
+                alert('เกิดข้อผิดพลาด: ' + (data.message || 'ไม่สามารถบันทึกได้'));
+                btn.disabled = false;
+                btn.textContent = 'บันทึกผลการประเมิน';
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('เกิดข้อผิดพลาดในการบันทึก: ' + error.message);
+            btn.disabled = false;
+            btn.textContent = 'บันทึกผลการประเมิน';
+        });
+    });
+</script>
+
 {% endblock %}

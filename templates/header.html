@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Header</title>
+    <title>Diabetes assessment</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style-header.css') }}">
 </head>
@@ -16,8 +16,8 @@
         </h1>
         </div>
 
-        <!-- ข้อความ Welcome (ดึงชื่อจาก localStorage ถ้ามี) -->
-        <div class="welcome" id="welcome">Welcome</div>
+        <!-- ข้อความ Welcome, ชื่อ User (ดึงชื่อจาก session) -->
+        <div class="welcome" id="welcome">Welcome, {{ session.get('first_name', 'Guest') }}</div>
 
         <!-- Navigation bar: ปุ่มจะพาไปไฟล์ .html ของแต่ละหน้า -->
         <nav class="tabbar" id="tabbar">
@@ -49,40 +49,6 @@
     </main>
 
     <script>
-
-
-
-
-
-
-
-
-
-
-
-      // แสดงชื่อผู้ใช้แบบตัดโดเมนหลัง '@'
-      window.addEventListener('load', () => {
-        const raw = localStorage.getItem('userEmail') || 'Guest';
-        const nameOnly = raw.includes('@') ? raw.split('@')[0] : raw;
-        document.getElementById('welcome').textContent = `Welcome, ${nameOnly}`;
-      });
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-      
       // ฟังก์ชันอัปเดตตำแหน่ง indicator และ notch
       function updateTabIndicator(immediate = false) {
         const tabbar = document.getElementById('tabbar');

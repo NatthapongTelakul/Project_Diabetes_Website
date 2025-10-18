@@ -31,6 +31,139 @@
             {% if fname != 'csrf_token' and fname != 'submit' %}
                 <div class="form-group">
                 <label class="form-label">{{ field.label.text }}</label>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                {% if fname == 'highbp' %}
+                    <div class="description">
+                        คำอธิบาย
+                        <br>ความดันโลหิต เป็นแรงดันเลือดที่เกิดจากหัวใจสูบฉีดเลือดไปเลี้ยงทั่วร่างกาย ซึ่งวัดได้ 2 ค่า ได้แก่
+                        <br>1.ความดันโลหิตค่าบน คือ แรงดันโลหิตขณะที่หัวใจบีบตัวเต็มที่
+                        <br>2.ความดันโลหิตค่าล่าง คือ แรงดันโลหิตขณะที่หัวใจคลายตัวเต็มที่
+                        <br>ความดันโลหิตสูง (Hypertension) เป็นภาวะที่ตรวจพบว่ามีความดันโลหิตอยู่ในระดับสูงผิดปกติ 
+                            คือมากกว่าหรือเท่ากับ 140/90 มิลลิเมตรปรอท ซึ่งอาจไม่แสดงอาการแต่จะเป็นสาเหตุทำให้เกิดภาวะแทรกซ้อนต่างๆ 
+                            เช่น โรคหัวใจ โรคหลอดเลือดสมอง เส้นเลือดแดงใหญ่โป่งพอง ไตวาย เป็นต้น หากไม่ได้รับการรักษาอย่างถูกต้องและเหมาะสม 
+                            อาจทำให้ผู้ป่วยทุพพลภาพหรือเสียชีวิตได้
+                        <br>ข้อมูลเพิ่มเติม:
+                        <a href="https://www.siphhospital.com/th/news/article/share/hypertension">โรงพยาบาลศิริราช ปิยมหาราชการุณย์ </a>
+                    </div>
+                {% elif fname == 'highchol' %}
+                    <div class="description">
+                        <h4>คำอธิบาย</h4>
+                        <br>คอเลสเตอรอล (Cholesterol) เป็นไขมันชนิดหนึ่งที่ร่างกายจำเป็นต้องใช้ในการสร้างฮอร์โมน วิตามิน D และสร้างผนังเซลล์
+                            แต่ถ้ามีมากเกินไปจะไปสะสมในผนังหลอดเลือด ทำให้หลอดเลือดตีบแคบและเสี่ยงหัวใจวายหรืออัมพาต 
+                        <br>ชนิดของคอเลสเตอรอล
+                        <br>1.LDL (Low-Density Lipoprotein) หรือ "ไขมันเลว" ถ้าสูงเกินไปจะสะสมในหลอดเลือด
+                        <br>2.HDL (High-Density Lipoprotein) หรือ "ไขมันดี" ช่วยพาไขมันส่วนเกินกลับไปที่ตับ
+                        <br>3.Triglycerides เป็นไขมันในเลือดอีกชนิดที่ถ้าสูงเกินไปก็เสี่ยงโรคหัวใจเช่นกัน
+                        <br>
+                        <br>คอเลสเตอรอลสูงเท่าไหร่ถึงอันตราย?
+                        <br>ตามเกณฑ์การตรวจเลือด (หน่วย mg/dL):
+                        <br>คอเลสเตอรอลรวม (Total Cholesterol)
+                        <ul>
+                            <li>ปกติ: < 200</li>
+                            <li>สูง borderline: 200–239</li>
+                            <li>สูง: ≥ 240 (เสี่ยงสูง)</li>
+                        </ul>
+                        <br>LDL (ไขมันเลว)
+                        <ul>
+                            <li>ดีมาก: < 100</li>
+                            <li>ค่อนข้างดี: 100–129</li>
+                            <li>ค่อนข้างสูง: 130–159</li>
+                            <li>สูง: 160–189</li>
+                            <li>สูงมาก: ≥ 190</li>
+                        </ul>
+                        <br>HDL (ไขมันดี)
+                        <ul>
+                            <li>ต่ำ (เสี่ยงโรคหัวใจ): < 40 (ชาย), < 50 (หญิง)</li>
+                            <li>ปกติ: ≥ 60 (ช่วยป้องกันโรคหัวใจ)</li>
+                        </ul>
+                        <br>สรุป
+                        <ul>
+                            <li>คอเลสเตอรอลรวม 160 mg/dL → อยู่ในเกณฑ์ปกติ</li>
+                            <li>คอเลสเตอรอลรวม 250 mg/dL → จัดว่าสูง ต้องควบคุมอาหารและปรึกษาแพทย์</li>
+                        </ul>
+                        <br>ข้อมูลเพิ่มเติม:
+                        <a href="https://vichaivej-nongkhaem.com/health-info/cholesterol-high-level-danger-causes-symptoms-treatment-foods?srsltid=AfmBOoovj5bgbq6ctPNqd1_-LJ6b7Qj6nyA3fCE3XsfLVENNF_5CPgCK">โรงพยาบาลวิชัยเวช อินเตอร์แนชั่นแนล หนองแขม </a>
+                    </div>
+                {% elif fname == 'heart' %}
+                    <div class="description">
+                        <h4>คำอธิบาย</h4>
+                        <br>โรคหัวใจ (heart disease) หมายถึง โรคหรือความผิดปกติต่าง ๆ ที่เกิดขึ้นกับหัวใจ ไม่ว่าจะเป็นกล้ามเนื้อหัวใจ หลอดเลือดหัวใจ 
+                            ลิ้นหัวใจ การนำไฟฟ้าของหัวใจ เยื่อหุ้มหัวใจ ซึ่งส่งผลให้การทำงานของหัวใจผิดปกติ โรคหัวใจสามารถแบ่งออกได้เป็นหลายโรค 
+                            ซึ่งแต่ละโรคมีสาเหตุและอาการแสดงที่แตกต่างกันออกไป
+                        <br>
+                        <br>สัญญาณเตือนโรคหัวใจมีอะไรบ้าง?
+                        <ul>
+                            <li>เจ็บหน้าอก (Angina): เป็นอาการที่พบมากที่สุด ผู้ป่วยจะรู้สึกเจ็บแน่นหรือรู้สึกว่ามีของมากดทับบริเวณกลางหน้าอกหรือด้านซ้ายของหน้าอก 
+                                และอาจมีปวดร้าวไปที่แขน คอ หลัง หรือกราม</li>
+                            <li>หายใจไม่ออก (Shortness of Breath): รู้สึกหายใจไม่เต็มที่ หายใจลำบาก อาการนี้อาจเกิดขึ้นระหว่างทำกิจกรรมหรือในขณะที่ นั่ง 
+                                หรือนอนพักก็ได้</li>
+                            <li>ใจสั่น (Palpitations): รู้สึกใจเต้นเร็ว ใจเต้นไม่เป็นจังหวะ หรือใจเต้นแรงผิดปกติ ซึ่งอาจเกิดจากโรคหัวใจเต้นผิดจังหวะ</li>
+                            <li>อ่อนเพลีย (Fatigue): รู้สึกเหนื่อยล้าโดยไม่มีสาเหตุชัดเจน</li>
+                            <li>เหงื่อออกมากผิดปกติ (Excessive Sweating): เหงื่อออกมากแม้ไม่ได้ออกกำลังกายหรืออยู่ในสภาพอากาศร้อน 
+                                อาจเป็นสัญญาณเตือนของโรคหัวใจ โดยเฉพาะหากเกิดขึ้นพร้อมกับอาการเจ็บหน้าอก</li>
+                            <li>คลื่นไส้หรืออาเจียน (Nausea or Vomiting): อาการเหล่านี้อาจเกิดขึ้นร่วมกับอาการเจ็บหน้าอก</li>
+                            <li>เวียนศีรษะหรือหน้ามืด (Dizziness or Lightheadedness): รู้สึกเวียนศีรษะ หน้ามืด หรือรู้สึกเหมือนจะกำลังหมดสติ</li>
+                            <li>ขาหรือข้อเท้าบวม (Swelling in Legs, Ankles, or Feet): การบวมที่ขาหรือข้อเท้าอาจเกิดจากหัวใจไม่สามารถสูบฉีดเลือดได้อย่างมีประสิทธิภาพ 
+                                ทำให้เกิดภาวะน้ำเกินในร่างกาย</li>
+                            <li>ปวดในส่วนต่าง ๆ ของร่างกาย (Pain in Different Parts of the Body): อาจรู้สึกปวดหรือไม่สบายในส่วนต่าง ๆ ของร่างกาย เช่น แขนซ้าย 
+                                หลัง คอ หรือกราม อาการเหล่านี้มักเกิดร่วมกับอาการเจ็บหน้าอก</li>
+                        </ul>
+                        <br>
+                        <br>ปัจจัยเสี่ยงของโรคหัวใจ
+                        <ul>
+                            <li>พฤติกรรมการใช้ชีวิตประจำวันที่มีการเคลื่อนไหวร่างกายน้อย การออกกำลังกายไม่เพียงพอ</li>
+                            <li>การรับประทานอาหารที่มีไขมันอิ่มตัว ไขมันทรานส์ และอาหารที่มีคอเลสเตอรอลสูง ซึ่งจะทำให้เกิดโรคต่าง ๆ ตามมาได้ เช่น 
+                                โรคอ้วน ความดันสูง คอเลสเตอรอลสูง และเบาหวาน ซึ่งโรคเหล่านี้เพิ่มความเสี่ยงการเป็นโรคหัวใจ</li>
+                            <li>การดื่มแอลกอฮอล์มากเกินไป เพราะจะทำให้ความดันเลือดสูงขึ้น และทำให้ระดับไตรกลีเซอไรด์ในเลือดสูงขึ้นซึ่งเพิ่มความเสี่ยงของโรคหัวใจ</li>
+                            <li>การสูบบุหรี่ เพราะสารพิษในควันบุหรี่จะไปทำลายหลอดเลือดให้เสียหายทำให้เป็นโรคหัวใจตามมาได้</li>
+                        </ul>
+                        <br>
+                        <br>ใครบ้างเสี่ยงโรคหัวใจ?
+                        <ul>
+                            <li>ผู้ที่มีประวัติครอบครัวเป็นโรคหัวใจ : หากมีสมาชิกในครอบครัวที่เป็นโรคหัวใจ จะมีความเสี่ยงสูงขึ้น</li>
+                            <li>ผู้สูงอายุ : อายุที่มากขึ้นจะเพิ่มความเสี่ยงต่อโรคหัวใจ โดยเฉพาะผู้ชายที่มีอายุเกิน 45 ปี และผู้หญิงที่มีอายุเกิน 55 ปี</li>
+                            <li>ผู้ชาย : ผู้ชายมีความเสี่ยงสูงกว่าผู้หญิงในการเกิดโรคหัวใจในช่วงวัยกลางคน</li>
+                            <li>ผู้ที่มีความดันโลหิตสูง : ความดันโลหิตสูงเป็นปัจจัยสำคัญที่เพิ่มความเสี่ยงในการเกิดโรคหัวใจ และทำให้มีภาวะหัวใจโตได้</li>
+                            <li>ผู้ที่มีคอเลสเตอรอลสูง : คอเลสเตอรอลสูง โดยเฉพาะคอเลสเตอรอลชนิดไม่ดี (LDL) สามารถนำไปสู่การสะสมของไขมันในหลอดเลือด ทำให้เกิดโรคหัวใจ</li>
+                            <li>ผู้ที่เป็นโรคเบาหวาน : ผู้ป่วยเบาหวานมีความเสี่ยงสูงต่อโรคหัวใจ เนื่องจากระดับน้ำตาลในเลือดสูงสามารถทำลายหลอดเลือด</li>
+                            <li>ผู้ที่สูบบุหรี่ : การสูบบุหรี่เพิ่มความเสี่ยงในการเกิดโรคหัวใจอย่างมาก เพราะสารพิษในบุหรี่ทำลายหลอดเลือด</li>
+                            <li>ผู้ที่มีน้ำหนักเกินหรือเป็นโรคอ้วน : น้ำหนักเกินเพิ่มความเสี่ยงในการเกิดโรคหัวใจ เนื่องจากเพิ่มความดันโลหิตและคอเลสเตอรอล</li>
+                            <li>ผู้ที่ขาดการออกกำลังกาย : การขาดการออกกำลังกายทำให้สุขภาพหัวใจแย่ลง และเพิ่มความเสี่ยงของโรคหัวใจ</li>
+                            <li>ผู้ที่มีความเครียดสูง : ความเครียดที่สะสมสามารถทำให้หัวใจทำงานหนักขึ้นและเพิ่มความเสี่ยงของโรคหัวใจ</li>
+                            <li>ผู้ที่รับประทานอาหารที่ไม่ดีต่อสุขภาพ : การรับประทานอาหารที่มีไขมันอิ่มตัว เกลือ และน้ำตาลสูงเพิ่มความเสี่ยงของโรคหัวใจ</li>
+                        </ul>
+                        <br>ข้อมูลเพิ่มเติม:
+                        <a href="https://praram9.com/th/articles/heart-diseases">โรงพยาบาลพระรามเก้า</a>
+                    </div>
+                {% endif %} 
+                
+
+
+
+
+
+
+
+
+
+
+
+
+
+
                 
                 {# Radio Field - Button Style #}
                 {% if field.type == 'RadioField' %}
@@ -46,16 +179,46 @@
                 
                 {# Select Field - Card Style #}
                 {% elif field.type == 'SelectField' %}
-                    <div class="select-cards">
-                    {% for value, label in field.choices %}
-                        <input type="radio" id="{{ fname }}_{{ value }}" name="{{ fname }}" value="{{ value }}" 
-                            {% if field.data == value %}checked{% endif %}>
-                        <label for="{{ fname }}_{{ value }}" class="select-card">
-                        <span class="card-label">{{ label }}</span>
-                        </label>
-                    {% endfor %}
-                    </div>
-                
+                    {% if field.name == 'genhlth' %}
+                        {# แถวเดียว - สำหรับ rating/satisfaction #}
+                        <div class="select-cards select-cards--row">
+                        {% for value, label in field.choices %}
+                            <input type="radio" id="{{ fname }}_{{ value }}" name="{{ fname }}" value="{{ value }}" 
+                                {% if field.data == value %}checked{% endif %}>
+                            <label for="{{ fname }}_{{ value }}" class="select-card">
+                                <img src="{{ url_for('static', filename='images/' ~ value ~ '_GenHlth.png') }}" alt="{{ label }}" class="card-image">
+                                <span class="card-label">{{ label }}</span>
+                            </label>
+                        {% endfor %}
+                        </div>
+                    {% else %}
+                        {# Grid - สำหรับช่วงอายุหรือ SelectField อื่นๆ #}
+                        <div class="select-cards select-cards--grid">
+                        {% for value, label in field.choices %}
+                            <input type="radio" id="{{ fname }}_{{ value }}" name="{{ fname }}" value="{{ value }}" 
+                                {% if field.data == value %}checked{% endif %}>
+                            <label for="{{ fname }}_{{ value }}" class="select-card">
+                                <span class="card-label">{{ label }}</span>
+                            </label>
+                        {% endfor %}
+                        </div>
+                    {% endif %}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
                 {# Integer Field - Modern Input with Range Slider #}
                 {% elif field.type == 'IntegerField' %}
                     <div class="input-group">
@@ -120,23 +283,23 @@
 
 
 <script>
-// Sync range slider with number input
-document.querySelectorAll('.range-slider').forEach(slider => {
-  const inputId = slider.id.replace('_slider', '');
-  const numberInput = document.getElementById(inputId);
-  
-  slider.addEventListener('input', (e) => {
-    numberInput.value = e.target.value;
-  });
-  
-  numberInput.addEventListener('input', (e) => {
-    slider.value = e.target.value;
-  });
-  
-  // Initialize slider value
-  if (numberInput.value) {
-    slider.value = numberInput.value;
-  }
-});
+    // Sync range slider with number input
+    document.querySelectorAll('.range-slider').forEach(slider => {
+    const inputId = slider.id.replace('_slider', '');
+    const numberInput = document.getElementById(inputId);
+    
+    slider.addEventListener('input', (e) => {
+        numberInput.value = e.target.value;
+    });
+    
+    numberInput.addEventListener('input', (e) => {
+        slider.value = e.target.value;
+    });
+    
+    // Initialize slider value
+    if (numberInput.value) {
+        slider.value = numberInput.value;
+    }
+    });
 </script>
 {% endblock %}
