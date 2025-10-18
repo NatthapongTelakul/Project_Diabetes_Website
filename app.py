@@ -80,6 +80,22 @@ def index():
 def sign():
     return render_template('sign.html')
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 # ลงทะเบียน account ใหม่
 @app.route('/register', methods=['GET', 'POST'])
 def register():
@@ -217,33 +233,12 @@ def login():
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+# เมื่อผู้ใช้ logout แล้วให้ลบข้อมูลใน session ด้วย
+@app.route('/logout')
+def logout():
+    session.clear()  # ลบข้อมูลทั้งหมดใน session
+    flash("You have been logged out.", "info")
+    return redirect(url_for('login'))
 
 
 
@@ -263,6 +258,17 @@ def login():
 def home():
     return render_template('home.html')
 
+@app.route('/calendar')
+def calendar():
+    return render_template('calendar.html', current_page='calendar')
+
+@app.route('/profile')
+def profile():
+    return render_template('profile.html', current_page='profile')
+
+@app.route('/menu')
+def menu():
+    return render_template('menu.html', current_page='menu')
 
 
 
@@ -469,9 +475,9 @@ def admin_dashboard():
     return render_template('admin_dashboard.html', name=session['first_name'])
 
 
-@app.route('/admin-contact')
-def profile():
-    return render_template('admin.html')    
+@app.route('/admin_contact')
+def admin_contact():
+    return render_template('admin_contact.html')    
 
 if __name__ == "__main__":
     app.run(debug=True, # เปิด debug mode (ต้องปิดเมื่อ deploy จริง)

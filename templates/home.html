@@ -5,51 +5,42 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
   <link rel="stylesheet" href="../static/css/style-home.css">
   <body>
-    <!-- พื้นที่คอนเทนต์ของหน้า Home -->
+    
     <main class="page">
-      <div class="container">
-        <form action="{{ url_for('predict_step', step=1) }}" method="get">
-          <button button type="submit">Start Assessment</button>
-        </form>
+      <!-- พื้นที่คอนเทนต์ฝั่งซ้ายของหน้า Home -->
+      <div class="left-container">
+
+        <!-- ส่วนปุ่มประเมินความเสี่ยงโรคเบาหวาน -->
+        <div class="assessment-box">
+          <div class="text">
+            แนะนำให้ใช้ข้อมูลผลเลือดหรือผลตรวจสุขภาพจากโรงพยาบาลประกอบการทำแบบทดสอบ
+          </div>
+          <form action="{{ url_for('predict_step', step=1) }}" method="get">
+            <button button type="submit">Start Assessment</button>
+          </form>
+        </div>
+
+        <!-- รูปภาพ main -->
+        <div class="container">
+          <div class="main-image">
+            <img id="mainDisplay" src="../static/images/diabetes-prevention.jpg" alt="main" />
+          </div>
+        </div>
       </div>
-      <div class="container">
-      <div class="main-image">
-        <img id="mainDisplay" src="../static/images/diabetes-prevention.jpg" alt="main" />
+
+      <!-- พื้นที่คอนเทนต์ฝั่งขวาของหน้า Home (เลือกรูปภาพให้แสดงฝั่งซ้าย)-->
+      <div class="right-container">
+        <div class="thumbnail-column">
+          <img class="thumbnail" src="../static/images/diabetes-meaning.jpg" onclick="showImage(1)" />
+          <img class="thumbnail" src="../static/images/diabetes-diagnosis.jpg" onclick="showImage(2)" />
+          <img class="thumbnail" src="../static/images/diabetes-treatment-target.jpg" onclick="showImage(3)" />
+          <img class="thumbnail" src="../static/images/diabetes-prevention.jpg" onclick="showImage(0)" />
+        </div>
       </div>
-      <div class="thumbnail-column">
-        <img class="thumbnail" src="../static/images/diabetes-meaning.jpg" onclick="showImage(1)" />
-        <img class="thumbnail" src="../static/images/diabetes-diagnosis.jpg" onclick="showImage(2)" />
-        <img class="thumbnail" src="../static/images/diabetes-treatment-target.jpg" onclick="showImage(3)" />
-        <img class="thumbnail" src="../static/images/diabetes-prevention.jpg" onclick="showImage(0)" />
-      </div>
-    </div>
     </main>
 
     <script>
-      // จัดตำแหน่ง indicator + notch ให้ตรงกับปุ่มที่ active เมื่อโหลด/รีไซส์
-      (function(){
-        const bar = document.getElementById('tabbar');
-        const indicator = bar.querySelector('.tab-indicator');
-        const notch = bar.querySelector('.tab-notch');
-        const tabs = Array.from(bar.querySelectorAll('.tab'));
-
-        function moveTo(el){
-          tabs.forEach(t => t.classList.remove('is-active'));
-          el.classList.add('is-active');
-
-          const r = el.getBoundingClientRect();
-          const br = bar.getBoundingClientRect();
-          const centerX = r.left + r.width/2 - br.left;
-
-          indicator.style.transform = `translateX(${centerX - indicator.offsetWidth/2}px)`;
-          notch.style.transform = `translateX(${centerX - notch.offsetWidth/2}px)`;
-        }
-
-        const current = bar.querySelector('.tab.is-active') || tabs[0];
-        window.addEventListener('load', () => moveTo(current));
-        window.addEventListener('resize', () => moveTo(current));
-      })();
-
+      // รายการรูปภาพทั้งหมด
       const images = [
         "../static/images/diabetes-prevention.jpg",
         "../static/images/diabetes-meaning.jpg",
@@ -57,15 +48,18 @@
         "../static/images/diabetes-treatment-target.jpg"
       ];
 
+      // ตัวแปรเก็บ Index ปัจจุบันและสถานะการเปลี่ยนรูปอัตโนมัติ
       let currentIndex = 0;
       let autoRotate = true;
 
+      // ฟังก์ชันแสดงรูปภาพตาม Index ที่เลือก
       function showImage(index) {
         currentIndex = index;
         document.getElementById("mainDisplay").src = images[currentIndex];
         autoRotate = false;
       }
 
+      // เปลี่ยนรูปภาพอัตโนมัติทุก 9 วินาที
       setInterval(() => {
         if (autoRotate) {
           currentIndex = (currentIndex + 1) % images.length;

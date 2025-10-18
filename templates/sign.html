@@ -53,8 +53,8 @@
             <input type="password" name="password" id="pass" required />
             <label for="pass" class="floating-label">Password</label>
             <!-- ปุ่มแสดง/ซ่อนรหัสผ่าน -->
-            <button type="button" class="toggle-password" onclick="togglePasswordSignin()">
-              <i class="zmdi zmdi-eye" id="eye-icon"></i>
+            <button type="button" class="toggle-password" onclick="togglePassword('pass', 'eye-icon-signin')">
+              <i class="zmdi zmdi-eye" id="eye-icon-signin"></i>
             </button>
           </div>
 
@@ -150,7 +150,7 @@
             <input type="password" name="password" id="password-signup" required />
             <label for="password-signup" class="floating-label">Password</label>
             <!-- ปุ่มแสดง/ซ่อนรหัสผ่าน -->
-            <button type="button" class="toggle-password" onclick="togglePasswordSignup()">
+            <button type="button" class="toggle-password" onclick="togglePassword('password-signup', 'eye-icon-signup')">
               <i class="zmdi zmdi-eye" id="eye-icon-signup"></i>
             </button>
           </div>
@@ -185,26 +185,10 @@
       document.body.classList.remove('signup-mode');
     });
 
-        // ฟังก์ชันสำหรับแสดง/ซ่อนรหัสผ่าน - Sign In
-    function togglePasswordSignin() {
-      const passwordInput = document.getElementById('pass');
-      const eyeIcon = document.getElementById('eye-icon-signin');
-      
-      if (passwordInput.type === 'password') {
-        passwordInput.type = 'text';
-        eyeIcon.classList.remove('zmdi-eye');
-        eyeIcon.classList.add('zmdi-eye-off');
-      } else {
-        passwordInput.type = 'password';
-        eyeIcon.classList.remove('zmdi-eye-off');
-        eyeIcon.classList.add('zmdi-eye');
-      }
-    }
-
-    // ฟังก์ชันสำหรับแสดง/ซ่อนรหัสผ่าน - Sign Up
-    function togglePasswordSignup() {
-      const passwordInput = document.getElementById('password-signup');
-      const eyeIcon = document.getElementById('eye-icon-signup');
+    // ฟังก์ชันแสดง/ซ่อนรหัสผ่าน (ใช้ได้ทั้ง Sign In และ Sign Up)
+    function togglePassword(passwordId, eyeIconId) {
+      const passwordInput = document.getElementById(passwordId);
+      const eyeIcon = document.getElementById(eyeIconId);
       
       if (passwordInput.type === 'password') {
         passwordInput.type = 'text';

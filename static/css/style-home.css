@@ -1,5 +1,46 @@
+@import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap');
+
 /* พื้นที่คอนเทนต์ของหน้า */
-.page{padding:24px}
+.page{
+  padding:24px;
+  display: flex;
+  flex-direction: row;
+}
+
+.left-container { 
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  width: 80%;
+  justify-content: flex-start; /* จัดชิดบนสุดในแนวตั้ง */
+}
+
+.assessment-box {
+  text-align: left;
+  padding:  16px;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
+
+.text {
+  font-family: 'Sarabun', sans-serif;
+  font-size: 24px;
+  min-height: 100%;
+  padding: 0;
+  position: relative;
+  margin-bottom: 16px;
+}
+
+.right-container {
+  padding:  16px;
+  display: flex;
+  flex-direction: column;
+  max-width: 20%;
+  justify-content: center;
+}
+
+
 
 button {
   background-color: #4CAF50; /* Green background */

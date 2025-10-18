@@ -24,19 +24,22 @@
         <span class="tab-notch" aria-hidden="true"></span>
         <span class="tab-indicator" aria-hidden="true"></span>
         
-        <!-- หน้านี้คือ home ⇒ ใส่ is-active -->
-        <button class="tab is-active" data-tab="home" aria-label="Home" onclick="location.href='home.html'">
+        <!-- เช็คว่าหน้าไหน active แล้วใส่ class is-active ให้อัตโนมัติ -->
+        <button class="tab {% if current_page == 'home' %}is-active{% endif %}" 
+                data-tab="home" aria-label="Home" onclick="location.href='{{ url_for('home') }}'">
             <i class="fa fa-home" aria-hidden="true"></i>
         </button>
-        <button class="tab" data-tab="calendar" aria-label="Calendar" onclick="location.href='calendar.html'">
+        <button class="tab {% if current_page == 'calendar' %}is-active{% endif %}" 
+                data-tab="calendar" aria-label="Calendar" onclick="location.href='{{ url_for('calendar') }}'">
             <i class="fa fa-calendar" aria-hidden="true"></i>
         </button>
-        <button class="tab" data-tab="profile" aria-label="Profile" onclick="location.href='profile.html'">
+        <button class="tab {% if current_page == 'profile' %}is-active{% endif %}" 
+                data-tab="profile" aria-label="Profile" onclick="location.href='{{ url_for('profile') }}'">
             <i class="fa fa-user" aria-hidden="true"></i>
         </button>
-        <button class="tab" data-tab="menu" aria-label="Menu" onclick="location.href='menu.html'">
+        <a href="{{ url_for('menu') }}" class="tab {% if current_page == 'menu' %}is-active{% endif %}" aria-label="Menu">
             <i class="fa fa-bars" aria-hidden="true"></i>
-        </button>
+        </a>
         </nav>
     </header>
     <main>
@@ -46,12 +49,84 @@
     </main>
 
     <script>
+
+
+
+
+
+
+
+
+
+
+
       // แสดงชื่อผู้ใช้แบบตัดโดเมนหลัง '@'
       window.addEventListener('load', () => {
         const raw = localStorage.getItem('userEmail') || 'Guest';
         const nameOnly = raw.includes('@') ? raw.split('@')[0] : raw;
         document.getElementById('welcome').textContent = `Welcome, ${nameOnly}`;
       });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+      
+      // ฟังก์ชันอัปเดตตำแหน่ง indicator และ notch
+      function updateTabIndicator(immediate = false) {
+        const tabbar = document.getElementById('tabbar');
+        const activeTab = tabbar.querySelector('.tab.is-active');
+        const indicator = tabbar.querySelector('.tab-indicator');
+        const notch = tabbar.querySelector('.tab-notch');
+        
+        if (activeTab && indicator && notch) {
+          const tabRect = activeTab.getBoundingClientRect();
+          const tabbarRect = tabbar.getBoundingClientRect();
+          const offsetLeft = tabRect.left - tabbarRect.left;
+          
+          const centerOffset = offsetLeft + (tabRect.width / 2) - (78 / 2);
+          const notchCenterOffset = offsetLeft + (tabRect.width / 2) - (105 / 2);
+          
+          // ถ้าต้องการให้เคลื่อนที่ทันที (ไม่มี transition)
+          if (immediate) {
+            indicator.style.transition = 'none';
+            notch.style.transition = 'none';
+          }
+          
+          indicator.style.transform = `translateX(${centerOffset}px)`;
+          notch.style.transform = `translateX(${notchCenterOffset}px)`;
+          
+          // เปิด transition กลับมาหลังจาก set ตำแหน่งแล้ว
+          if (immediate) {
+            setTimeout(() => {
+              indicator.style.transition = '';
+              notch.style.transition = '';
+            }, 50);
+          }
+        }
+      }
+
+      // ตั้งค่าตำแหน่งเริ่มต้นทันทีก่อนหน้าจอโหลดเสร็จ
+      updateTabIndicator(true);
+
+      // เรียกใช้อีกครั้งเมื่อโหลดหน้าเว็บเสร็จสมบูรณ์
+      window.addEventListener('load', () => {
+        updateTabIndicator(true);
+      });
+
+      // อัปเดตตำแหน่งเมื่อ resize หน้าจอ
+      window.addEventListener('resize', () => updateTabIndicator(false));
     </script>
 </body>
 </html>
