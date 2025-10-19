@@ -71,6 +71,10 @@ main {
   animation: slideUp 0.6s ease-out 0.1s both;
 }
 
+.status-label-section {
+  margin-bottom: 25px;
+}
+
 @keyframes slideUp {
   from {
     opacity: 0;
@@ -103,16 +107,16 @@ main {
   animation: pulse 2s ease-in-out infinite;
 }
 
-.risk-circle-green {
-  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-  color: white;
-  box-shadow: 0 12px 40px rgba(16, 185, 129, 0.4);
-}
-
 .risk-circle-green-dark {
   background: linear-gradient(135deg, #059669 0%, #047857 100%);
   color: white;
   box-shadow: 0 12px 40px rgba(5, 150, 105, 0.4);
+}
+
+.risk-circle-green-light {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+  box-shadow: 0 12px 40px rgba(16, 185, 129, 0.4);
 }
 
 .risk-circle-yellow {
@@ -148,10 +152,10 @@ main {
   }
 }
 
-.risk-icon {
-  display: flex;
-  justify-content: center;
-  align-items: center;
+.risk-icon-image {
+  width: 120px;
+  height: 120px;
+  object-fit: contain;
 }
 
 /* Risk Content */
@@ -324,14 +328,14 @@ main {
   border-left: 6px solid;
 }
 
-.recommendation-card.recommendation-green {
-  background: #dcfce7;
-  border-color: #16a34a;
-}
-
 .recommendation-card.recommendation-green-dark {
   background: #bbf7d0;
   border-color: #059669;
+}
+
+.recommendation-card.recommendation-green-light {
+  background: #dcfce7;
+  border-color: #16a34a;
 }
 
 .recommendation-card.recommendation-yellow {

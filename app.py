@@ -297,87 +297,6 @@ def predict_step(step):
     image = step_cfg.get('image')
     return render_template('step.html', form=form, step=step, total=total_steps, image=image, current_page='home')
 
-# @app.route('/predict/result')
-# def result():
-#     # เอาข้อมูลจาก session มาจัด features
-#     # ระวังค่าสตริง -> แปลงเป็น int ก่อนใช้
-#     try:
-#         highbp = int(session.get('highbp', 0))
-#         highchol = int(session.get('highchol', 0))
-#         heart = int(session.get('heart', 0))
-#         diffwalk = int(session.get('diffwalk', 0))
-#         genhlth = int(session.get('genhlth', 3))
-#         physhlth = int(session.get('physhlth', 0))
-#         # age stored as choice string like "1","2"... convert to index or numeric representation you used in training
-#         age_choice = session.get('age', "1")
-#         age = int(age_choice)
-#         # height & weight
-#         height = session.get('height')
-#         weight = session.get('weight')
-#         if height is not None and weight is not None:
-#             height = float(height)
-#             weight = float(weight)
-#             height_m = height / 100.0
-#             bmi = weight / (height_m ** 2)
-#             bmi = round(bmi, 2)
-#         else:
-#             bmi = 0.0
-
-#         bmi_cat = 0
-#         if bmi < 18.5:
-#             bmi_cat = 0   # Underweight
-#         elif bmi < 25:
-#             bmi_cat = 1   # Normal
-#         elif bmi < 30:
-#             bmi_cat = 2   # Overweight
-#         else:
-#             bmi_cat = 3   # Obese
-            
-#         bmi_age_interaction = int(round(bmi * age))
-
-#         # สร้าง DataFrame ตาม feature ที่โมเดลคาดหวัง
-#         features = pd.DataFrame([{
-#             'HighBP': highbp,
-#             'HighChol': highchol,
-#             'BMI': bmi,
-#             'HeartDiseaseorAttack': heart,
-#             'GenHlth': genhlth,
-#             'PhysHlth': physhlth,
-#             'DiffWalk': diffwalk,
-#             'Age': age,
-#             'BMI_cat_code': bmi_cat,
-#             'BMI_Age_interaction': bmi_age_interaction
-#         }])
-
-#         # เลือกโมเดลจาก session (value เช่น 'random_forest', 'knn' ...)
-#         model_name = session.get('model_choice', 'random_forest')
-#         model_path = os.path.join('models', f"{model_name}.joblib")
-#         if os.path.exists(model_path):
-#             model = joblib.load(model_path)
-#             y_pred = model.predict(features)[0]
-#             # ถ้าโมเดลมี predict_proba
-#             try:
-#                 y_prob = model.predict_proba(features)[0][1] * 100
-#             except Exception:
-#                 y_prob = None
-#             prediction_result = int(y_pred)
-#             probability = round(y_prob, 2) if y_prob is not None else None
-#         else:
-#             # หากไม่มีโมเดล ให้ mock ผลลัพธ์ (หรือแจ้ง error)
-#             prediction_result = 0
-#             probability = None
-
-#         # ส่งข้อมูลไปแสดง
-#         data = {cfg['name']: session.get(cfg['name']) for cfg in steps}
-#         return render_template('result.html',
-#                                prediction=prediction_result,
-#                                probability=probability,
-#                                data=data,
-#                                bmi=bmi)
-#     except Exception as e:
-#         # แสดง error ง่ายๆ (คุณอาจอยากบันทึก/แจ้งอย่างดีกว่านี้)
-#         return f"Error preparing result: {e}", 500
-
     
 
 
@@ -400,18 +319,11 @@ def predict_step(step):
 
 
 
-
-
-
-
-
-@app.route('/predict/result')
+@app.route('/predict/result', methods=['GET', 'POST'])
 def result():
     # เอาข้อมูลจาก session มาจัด features
-    # ระวังค่าสตริง ต้องแปลงเป็น int ก่อนใช้
+    # แปลง String เป็น int ก่อนใช้
     try:
-        from datetime import datetime
-        
         highbp = int(session.get('highbp', 0))
         highchol = int(session.get('highchol', 0))
         heart = int(session.get('heart', 0))
@@ -458,7 +370,7 @@ def result():
             'BMI_Age_interaction': bmi_age_interaction
         }])
 
-        # เลือกโมเดลจาก session
+        # เลือกโมเดลจาก session (random_forest เป็นค่า default)
         model_name = session.get('model_choice', 'random_forest')
         model_path = os.path.join('models', f"{model_name}.joblib")
         
@@ -476,13 +388,85 @@ def result():
             probability = None
 
         # ส่งข้อมูลไปแสดง
-        data = {cfg['name']: session.get(cfg['name']) for cfg in steps}
-        
+        data = {
+            'highbp': session.get('highbp'),
+            'highchol': session.get('highchol'),
+            'heart': session.get('heart'),
+            'diffwalk': session.get('diffwalk'),
+            'genhlth': session.get('genhlth'),
+            'physhlth': session.get('physhlth'),
+            'age': session.get('age'),
+            'height': session.get('height'),
+            'weight': session.get('weight'),
+            'bmi': bmi,
+            'bmi_cat_code': bmi_cat,
+            'bmi_age_interaction': bmi_age_interaction,
+            'model_choice': session.get('model_choice')
+        }
+
+        # ========== ตรวจสอบข้อมูลจาก MySQL Category ==========
+        risk_data = {
+            'category_id': None,
+            'risk_level': 'ไม่สามารถประเมินได้',
+            'risk_color': 'gray',
+            'risk_icon': 'unknown.png',
+            'recommendation': 'ไม่มีคำแนะนำ'
+        }
+
+        # ตรวจสอบและดึงข้อมูล Category ตามระดับความเสี่ยง
+        if probability is not None:
+            cur = mysql.connection.cursor()
+
+            # ใช้ <= เพื่อให้ครอบคลุมค่าที่เท่ากับ RiskPercent_Upper (เช่น 100.0)
+            query = """
+                SELECT CategoryID, RiskPercent_Lower, RiskPercent_Upper,
+                    Risk_Level, Risk_Color, Risk_Icon, Recommendation
+                FROM Category
+                WHERE %s >= RiskPercent_Lower AND %s <= RiskPercent_Upper
+                LIMIT 1
+            """
+            cur.execute(query, (probability, probability))
+            category = cur.fetchone()
+            cur.close()
+
+            # ตรวจสอบว่าเจอข้อมูลหรือไม่
+            if category:
+                # ถ้ามีข้อมูลในตาราง Category
+                risk_data = {
+                    'category_id': category['CategoryID'],
+                    'risk_level': category['Risk_Level'],
+                    'risk_color': category['Risk_Color'],
+                    'risk_icon': category['Risk_Icon'],
+                    'recommendation': category['Recommendation']
+                }
+                print(f"[DEBUG] Category matched: {risk_data}")  # สำหรับตรวจสอบ
+            else:
+                # ถ้าไม่พบหมวดหมู่ที่ตรงกับค่า probability
+                print(f"[DEBUG] No category found for probability = {probability}")
+
+                risk_data = {
+                    'category_id': None,
+                    'risk_level': 'ไม่พบหมวดหมู่ที่ตรงกับความเสี่ยงนี้',
+                    'risk_color': 'gray',
+                    'risk_icon': 'unknown.png',
+                    'recommendation': 'ไม่มีคำแนะนำสำหรับค่าความเสี่ยงนี้'
+                }
+        else:
+            # กรณี probability ไม่มีค่า (probability เป็น None)
+            print("[DEBUG] Probability is None")
+            risk_data = {
+                'category_id': None,
+                'risk_level': 'ไม่สามารถประเมินความเสี่ยงได้',
+                'risk_color': 'gray',
+                'risk_icon': 'unknown.png',
+                'recommendation': 'กรุณาลองประเมินใหม่อีกครั้ง'
+            }
+
         return render_template('result.html',
                                prediction=prediction_result,
                                probability=probability,
                                data=data,
-                               bmi=bmi,
+                               risk_data=risk_data,
                                prediction_datetime=datetime.now(),
                                current_page='home')
     except Exception as e:

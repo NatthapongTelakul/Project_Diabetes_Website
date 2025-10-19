@@ -1,5 +1,7 @@
 {% extends "header.html" %}
 {% block content %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
 <link rel="stylesheet" href="{{ url_for('static', filename='css/style-step.css') }}">
 
 <div class="step-container">
@@ -268,10 +270,8 @@
             <div class="action-buttons">
             {% if step > 1 %}
                 <a href="{{ url_for('predict_step', step=step-1) }}" class="btn btn-back">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M19 12H5M12 19l-7-7 7-7"/>
-                </svg>
-                ย้อนกลับ
+                    <i class="fa-solid fa-arrow-left"></i>
+                    ย้อนกลับ
                 </a>
             {% endif %}
             {{ form.submit(class="btn btn-next") }}
