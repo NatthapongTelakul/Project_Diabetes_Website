@@ -234,7 +234,7 @@
 
     <!-- Notes Section -->
     <div class="notes-section">
-        <h3>บันทึกเพิ่มเติม (เลือกได้)</h3>
+        <h3>บันทึกเพิ่มเติม (เลือกไม่กรอกได้)</h3>
         <form method="POST" action="{{ url_for('save_result') }}" id="saveResultForm">
             <div class="form-group">
                 <textarea id="userNote" name="userNote" class="user-note-input" 
@@ -246,6 +246,8 @@
             </div>
 
             <!-- Hidden fields to store data -->
+            <!-- ส่วน “Hidden fields to store data” หมายถึง ช่องข้อมูลแบบซ่อน (hidden input fields) ที่อยู่ใน <form> 
+                โดยที่ ผู้ใช้มองไม่เห็นบนหน้าเว็บ แต่จะถูกส่งไปพร้อมกับฟอร์มเมื่อกด “บันทึกผลการประเมิน” -->
             <input type="hidden" name="prediction" value="{{ prediction }}">
             <input type="hidden" name="probability" value="{{ probability }}">
             <input type="hidden" name="bmi" value="{{ data.get('bmi', 0) }}">

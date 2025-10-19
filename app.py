@@ -505,7 +505,7 @@ def result():
 @app.route('/predict/save_result', methods=['POST'])
 def save_result():
     """
-    Save prediction result to database
+    Save prediction result to database (MySQL version)
     """
     try:
         # Check if user is logged in
@@ -532,64 +532,62 @@ def save_result():
         weight = int(session.get('weight', 0)) if session.get('weight') else 0
 
         # Calculate BMI category
-        bmi_cat_code = 0
         if bmi < 18.5:
-            bmi_cat_code = 0   # Underweight
+            bmi_cat_code = 0
         elif bmi < 25:
-            bmi_cat_code = 1   # Normal
+            bmi_cat_code = 1
         elif bmi < 30:
-            bmi_cat_code = 2   # Overweight
+            bmi_cat_code = 2
         else:
-            bmi_cat_code = 3   # Obese
+            bmi_cat_code = 3
 
         # Calculate BMI-Age interaction
         bmi_age_interaction = int(round(bmi * age))
 
-        # Determine category based on probability (from Category table)
-        category_id = None
+        # Determine risk category based on probability
         if probability < 50:
-            category_id = 1  # ความเสี่ยงต่ำที่สุด
+            category_id = 1
         elif probability < 60:
-            category_id = 2  # ความเสี่ยงต่ำ
+            category_id = 2
         elif probability < 70:
-            category_id = 3  # ความเสี่ยงปานกลาง
+            category_id = 3
         elif probability < 90:
-            category_id = 4  # ความเสี่ยงมาก
+            category_id = 4
         else:
-            category_id = 5  # ความเสี่ยงมากที่สุด
+            category_id = 5
 
-        # Create prediction record
-        from datetime import datetime
-        prediction_record = PredictionRecord(
-            user_id=user_id,
-            highbp=highbp,
-            highchol=highchol,
-            bmi=bmi,
-            heart_disease_or_attack=heart,
-            genhlth=genhlth,
-            physhlth=physhlth,
-            diffwalk=diffwalk,
-            age=age,
-            bmi_cat_code=bmi_cat_code,
-            bmi_age_interaction=bmi_age_interaction,
-            category_id=category_id,
-            height=height,
-            weight=weight,
-            model_used=model_used,
-            predict_datetime=datetime.now(),
-            result_binary=prediction,
-            result_percentage=probability,
-            user_note=user_note if user_note else None
+        # Insert into MySQL
+        cur = mysql.connection.cursor()
+
+        insert_query = """
+            INSERT INTO PredictionRecord (
+                UserID, HighBP, HighChol, BMI, HeartDiseaseorAttack,
+                GenHlth, PhysHlth, DiffWalk, Age, BMI_cat_code, 
+                BMI_Age_interaction, CategoryID, Height, Weight, 
+                Model_Used, PredictDateTime, Result_Binary, 
+                Result_Percentage, UserNote
+            )
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+        """
+        
+        values = (
+            user_id, highbp, highchol, bmi, heart,
+            genhlth, physhlth, diffwalk, age, bmi_cat_code,
+            bmi_age_interaction, category_id, height, weight,
+            model_used, datetime.now(), prediction,
+            probability, user_note if user_note else None
         )
 
-        # Save to database
-        db.session.add(prediction_record)
-        db.session.commit()
+        cur.execute(insert_query, values)
+        mysql.connection.commit()
 
-        # Clear session data after successful save
+        prediction_id = cur.lastrowid
+        cur.close()
+
+        # Clear session data after saving
         session_keys_to_clear = [
-            'highbp', 'highchol', 'heart', 'diffwalk', 
-            'height', 'weight', 'genhlth', 'physhlth', 
+            'highbp', 'highchol', 'heart', 'diffwalk',
+            'height', 'weight', 'genhlth', 'physhlth',
             'age', 'model_choice'
         ]
         for key in session_keys_to_clear:
@@ -598,20 +596,14 @@ def save_result():
         return jsonify({
             'success': True,
             'message': 'บันทึกผลการประเมินเรียบร้อยแล้ว',
-            'prediction_id': prediction_record.prediction_id
+            'prediction_id': prediction_id
         }), 200
 
     except ValueError as e:
-        return jsonify({
-            'success': False,
-            'message': f'ข้อมูลไม่ถูกต้อง: {str(e)}'
-        }), 400
+        return jsonify({'success': False, 'message': f'ข้อมูลไม่ถูกต้อง: {str(e)}'}), 400
     except Exception as e:
-        db.session.rollback()
-        return jsonify({
-            'success': False,
-            'message': f'เกิดข้อผิดพลาด: {str(e)}'
-        }), 500
+        mysql.connection.rollback()
+        return jsonify({'success': False, 'message': f'เกิดข้อผิดพลาด: {str(e)}'}), 500
 
 
 
