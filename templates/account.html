@@ -1,0 +1,165 @@
+{% extends "header.html" %}
+{% block content %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style-account.css') }}">
+
+<div class="account-container">
+  <div class="account-header">
+    <h1>แก้ไขโปรไฟล์</h1>
+  </div>
+
+  <!-- Profile Image Section -->
+  <div class="profile-image-section">
+    <div class="profile-image-container">
+      <img 
+        src="{{ url_for('static', filename='images/ProfileImage/' + profile_image) }}" 
+        alt="Profile" 
+        class="profile-image"
+      >
+    </div>
+  </div>
+
+  <!-- ส่วนแสดง Flash Message -->
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      {% for category, message in messages %}
+        <div class="flash-message {{ category }}">
+          {{ message }}
+        </div>
+      {% endfor %}
+    {% endif %}
+  {% endwith %}
+  <!-- จบส่วน flash -->
+
+  <form method="POST" action="{{ url_for('update_account') }}" class="account-form">
+    
+    <!-- FirstName -->
+    <div class="form-group">
+      <label for="first_name">ชื่อ</label>
+      <input 
+        type="text" 
+        id="first_name" 
+        name="first_name" 
+        value="{{ first_name }}" 
+        required
+        class="form-input"
+      >
+    </div>
+
+    <!-- LastName -->
+    <div class="form-group">
+      <label for="last_name">นามสกุล</label>
+      <input 
+        type="text" 
+        id="last_name" 
+        name="last_name" 
+        value="{{ last_name }}" 
+        required
+        class="form-input"
+      >
+    </div>
+
+    <!-- Email (Read-only) -->
+    <div class="form-group">
+      <label for="email">อีเมล (ไม่สามารถแก้ไข)</label>
+      <input 
+        type="email" 
+        id="email" 
+        name="email" 
+        value="{{ email }}" 
+        readonly
+        class="form-input readonly"
+      >
+    </div>
+
+    <!-- Current Password -->
+    <div class="form-group">
+      <label for="current_password">รหัสผ่านปัจจุบัน (เพื่อยืนยัน)</label>
+      <input 
+        type="password" 
+        id="current_password" 
+        name="current_password" 
+        placeholder="กรอกรหัสผ่านปัจจุบัน"
+        class="form-input"
+      >
+      <small class="form-help">กรอกเฉพาะเมื่อต้องการเปลี่ยนรหัสผ่าน</small>
+    </div>
+
+    <!-- New Password -->
+    <div class="form-group">
+      <label for="new_password">รหัสผ่านใหม่</label>
+      <input 
+        type="password" 
+        id="new_password" 
+        name="new_password" 
+        placeholder="กรอกรหัสผ่านใหม่"
+        class="form-input"
+      >
+      <small class="form-help">ปล่อยว่างหากไม่ต้องการเปลี่ยน</small>
+    </div>
+
+    <!-- Confirm New Password -->
+    <div class="form-group">
+      <label for="confirm_password">ยืนยันรหัสผ่านใหม่</label>
+      <input 
+        type="password" 
+        id="confirm_password" 
+        name="confirm_password" 
+        placeholder="ยืนยันรหัสผ่านใหม่"
+        class="form-input"
+      >
+    </div>
+
+    <!-- Buttons -->
+    <div class="form-buttons">
+      <a href="{{ url_for('menu') }}" class="btn btn-secondary">
+        <i class="fa fa-arrow-left"></i> กลับไปเมนู
+      </a>
+      <button type="submit" class="btn btn-primary">
+        <i class="fa fa-save"></i> บันทึกการแก้ไข
+      </button>
+    </div>
+  </form>
+</div>
+
+<script>
+    const newPasswordInput = document.getElementById('new_password');
+    const confirmPasswordInput = document.getElementById('confirm_password');
+    const currentPasswordInput = document.getElementById('current_password');
+    
+    // ฟังก์ชันเพื่อจัดการการเปิด/ปิด confirm_password
+    function updateConfirmPasswordState() {
+        if (newPasswordInput.value.trim() === '') {
+            // ถ้า new_password ว่าง ให้ disable confirm_password และลบค่าออก
+            confirmPasswordInput.disabled = true;
+            confirmPasswordInput.value = '';
+            confirmPasswordInput.placeholder = 'Enter new password first';
+            currentPasswordInput.value = '';
+            currentPasswordInput.disabled = false;
+        } else {
+            // ถ้า new_password มีค่า ให้ enable confirm_password และ require current_password
+            confirmPasswordInput.disabled = false;
+            confirmPasswordInput.placeholder = 'Confirm your new password';
+            currentPasswordInput.disabled = false;
+        }
+    }
+    
+    // เรียกใช้ฟังก์ชันเมื่อ new_password เปลี่ยนแปลง
+    newPasswordInput.addEventListener('input', updateConfirmPasswordState);
+    
+    // ตรวจสอบเมื่อ form submit
+    document.querySelector('form').addEventListener('submit', function(e) {
+        const newPass = newPasswordInput.value.trim();
+        const confirmPass = confirmPasswordInput.value.trim();
+        
+        if (newPass === '' && confirmPass !== '') {
+            e.preventDefault();
+            alert('Cannot fill confirm password without new password');
+            confirmPasswordInput.focus();
+        }
+    });
+    
+    // เรียกใช้เมื่อ page load
+    updateConfirmPasswordState();
+</script>
+
+{% endblock %}

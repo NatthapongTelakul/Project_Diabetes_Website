@@ -1,0 +1,81 @@
+{% extends "header.html" %}
+{% block content %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style-feedback.css') }}">
+
+<div class="feedback-container">
+  <!-- ส่วนแสดง Flash Message -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            {% for category, message in messages %}
+              <div class="flash-message {{ category }}">
+                {{ message }}
+              </div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+        <!-- จบส่วน flash -->
+  <div class="feedback-header">
+    <img src="{{ url_for('static', filename='images/icon-suggest.png') }}" class="feedback-icon">
+    <h2>ข้อเสนอแนะ / ติดต่อเรา</h2>
+  </div>
+
+   
+
+  <!--  ฟอร์มเสนอแนะ -->
+  <form method="POST" class="feedback-form">
+    <div class="feedback-section">
+      <h3>ข้อมูลผู้ใช้</h3>
+      <div class="feedback-input-group">
+        <input type="text" name="name" placeholder="ชื่อของคุณ" required>
+        <input type="email" name="email" placeholder="อีเมล" required>
+      </div>
+    </div>
+
+    <div class="feedback-section">
+      <h3>ข้อความถึงเรา</h3>
+      <textarea name="message" rows="4" placeholder="กรอกข้อความ / ข้อเสนอแนะของคุณ..." required></textarea>
+
+      <div class="privacy">
+        <input type="checkbox" id="agree" required>
+        <label for="agree">ฉันยอมรับนโยบายความเป็นส่วนตัว</label>
+      </div>
+
+      <div class="btn-wrapper">
+        <button type="submit" class="btn-confirm">ส่งข้อมูล</button>
+      </div>
+    </div>
+  </form>
+
+  <!--  ส่วนติดต่อเรา -->
+  <div class="contact-section">
+    <div class="contact-header">
+      <img src="{{ url_for('static', filename='images/icon-contact.png') }}" class="contact-icon">
+      <h2>ติดต่อเรา</h2>
+    </div>
+
+    <div class="contact-info">
+      <div class="contact-item">
+        <i class="fa fa-phone"></i>
+        <p><b>เบอร์โทรศัพท์</b><br>+66 9999 9999</p>
+      </div>
+
+      <div class="contact-item">
+        <i class="fa fa-envelope"></i>
+        <p><b>E-mail</b><br>
+          sugar.f@gmail.com<br>
+          sugar.free@ai.ac.th
+        </p>
+      </div>
+    </div>
+
+    <div class="contact-social">
+      <p><b>ติดตามเรา</b></p>
+      <div class="social-icons">
+        <a href="#"><img src="{{ url_for('static', filename='images/icon-fb.png') }}" alt="Facebook"></a>
+        <a href="#"><img src="{{ url_for('static', filename='images/icon-line.png') }}" alt="LINE OA"></a>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

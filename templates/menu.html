@@ -1,7 +1,31 @@
 {% extends "header.html" %}
-
 {% block content %}
-<body>
-  <h2> Menu </h2>
-</body>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style-menu.css') }}">
+
+<div class="menu-header">
+
+</div>
+
+<div class="menu-container">
+  <!-- โปรไฟล์ -->
+  <div class="menu-item" onclick="window.location.href='{{ url_for('account') }}'">
+    <img src="{{ url_for('static', filename='images/icon-user.png') }}" alt="profile" class="menu-icon">
+    <span>แก้ไขโปรไฟล์ / รหัสผ่าน</span>
+    <i class="fa fa-chevron-right"></i>
+  </div>
+
+  <!-- ข้อเสนอแนะ / ติดต่อเรา -->
+  <div class="menu-item" onclick="window.location.href='{{ url_for('feedback') }}'">
+    <img src="{{ url_for('static', filename='images/icon-contact.png') }}" alt="feedback" class="menu-icon">
+    <span>ข้อเสนอแนะ / ติดต่อเรา</span>
+    <i class="fa fa-chevron-right"></i>
+  </div>
+
+ <div class="menu-item logout" onclick="window.location.href='{{ url_for('logout') }}'">
+    <img src="{{ url_for('static', filename='images/icon-logout.png') }}" alt="logout" class="menu-icon">
+    <span>ออกจากระบบ</span>
+    <i class="fa fa-sign-out"></i>
+</div>
+
+</div>
 {% endblock %}

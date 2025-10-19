@@ -3,7 +3,7 @@ import joblib
 import pandas as pd
 import numpy as np
 from flask import Flask, request, render_template, redirect, url_for, flash, session, jsonify
-
+import calendar as cal
 
 from dotenv import load_dotenv
 from flask_bcrypt import Bcrypt
@@ -51,7 +51,7 @@ steps = [
 ]
 
 ALLOWED_IMAGE_EXT = {'png','jpg','jpeg'}
-UPLOAD_FOLDER_IMAGES = '/static/images/ProfileImage'
+UPLOAD_FOLDER_IMAGES = os.path.join(app.root_path, 'static', 'images', 'ProfileImage')
 UPLOAD_FOLDER_MODELS = '/models'
 app.config['UPLOAD_FOLDER_IMAGES'] = UPLOAD_FOLDER_IMAGES
 app.config['UPLOAD_FOLDER_MODELS'] = UPLOAD_FOLDER_MODELS
@@ -98,7 +98,7 @@ def register():
     birthday = data.get('birthday')  # format YYYY-MM-DD
 
     # จัดการไฟล์รูปภาพโปรไฟล์
-    profile_image_path = None
+    profile_filename = None
     if 'profile_image' in request.files:
         file = request.files['profile_image']
         if file and file.filename != '' and allowed_file(file.filename, ALLOWED_IMAGE_EXT):
@@ -109,14 +109,15 @@ def register():
             name, ext = os.path.splitext(filename)
             unique_filename = f"{name}_{timestamp}{ext}"
             
-            # บันทึกไฟล์
+            # บันทึกไฟล์ลงโฟลเดอร์ static/images/ProfileImage
             upload_path = os.path.join(app.root_path, 'static', 'images', 'ProfileImage')
             if not os.path.exists(upload_path):
                 os.makedirs(upload_path)
             
             file.save(os.path.join(upload_path, unique_filename))
-            # เก็บ path สำหรับใช้ใน database
-            profile_image_path = f"/static/images/ProfileImage/{unique_filename}"
+            
+            # เก็บเฉพาะชื่อไฟล์ไว้ใน database
+            profile_filename = unique_filename
 
     if not (email and password):
         flash("Email and password required", "danger")
@@ -133,11 +134,11 @@ def register():
     # ใช้ flask_bcrypt เข้ารหัส
     hashed = bcrypt.generate_password_hash(password).decode('utf-8')
 
-    # Insert พร้อม ProfileImage
-    if profile_image_path:
+    # Insert พร้อมชื่อไฟล์ ProfileImage (ไม่รวม path)
+    if profile_filename:
         sql = """INSERT INTO Account (FirstName, LastName, Birthday, Email, Password, Role, ProfileImage)
                  VALUES (%s, %s, %s, %s, %s, %s, %s)"""
-        cur.execute(sql, (first, last, birthday, email, hashed, 'User', profile_image_path))
+        cur.execute(sql, (first, last, birthday, email, hashed, 'User', profile_filename))
     else:
         sql = """INSERT INTO Account (FirstName, LastName, Birthday, Email, Password, Role)
                  VALUES (%s, %s, %s, %s, %s, %s)"""
@@ -147,6 +148,7 @@ def register():
     cur.close()
     flash("Registered successfully. Please login.", "success")
     return redirect(url_for('login'))
+
 
 
 
@@ -221,12 +223,7 @@ def login():
 
 
 
-# เมื่อผู้ใช้ logout แล้วให้ลบข้อมูลใน session ด้วย
-@app.route('/logout')
-def logout():
-    session.clear()  # ลบข้อมูลทั้งหมดใน session
-    flash("You have been logged out.", "info")
-    return redirect(url_for('login'))
+
 
 
 
@@ -246,17 +243,93 @@ def logout():
 def home():
     return render_template('home.html', current_page='home')
 
+
+
+
+
+
+
+
+
+
+
+# Route สำหรับแสดงหน้า calendar
 @app.route('/calendar')
 def calendar():
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
     return render_template('calendar.html', current_page='calendar')
+
+
+@app.route('/calendar/events', methods=['GET'])
+def get_events():
+    user_id = session.get('user_id')
+    cur = mysql.connection.cursor()
+    cur.execute("SELECT EventDate, EventText FROM CalendarEvent WHERE UserID = %s", (user_id,))
+    events = cur.fetchall()
+    return jsonify(events)
+
+
+@app.route('/calendar/add', methods=['POST'])
+def add_event():
+    user_id = session.get('user_id')
+    data = request.get_json()
+    event_date = data.get('date')
+    event_text = data.get('text')
+
+    cur = mysql.connection.cursor()
+
+    # ตรวจสอบจำนวนกิจกรรมในวันนั้น (ใช้ alias และอ่านจากชื่อคีย์)
+    cur.execute("SELECT COUNT(*) AS count FROM CalendarEvent WHERE UserID = %s AND EventDate = %s", (user_id, event_date))
+    result = cur.fetchone()
+    count = result['count'] if isinstance(result, dict) else result[0]
+
+    if count >= 5:
+        return jsonify({'success': False, 'message': 'เพิ่มกิจกรรมได้สูงสุด 5 รายการต่อวัน'})
+
+    cur.execute(
+        "INSERT INTO CalendarEvent (UserID, EventDate, EventText) VALUES (%s, %s, %s)",
+        (user_id, event_date, event_text)
+    )
+    mysql.connection.commit()
+    cur.close()
+
+    return jsonify({'success': True, 'message': 'บันทึกกิจกรรมเรียบร้อยแล้ว'})
+
+
+
+
+
+
+
+
+
 
 @app.route('/profile')
 def profile():
-    return render_template('profile.html', current_page='profile')
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+    
+    user_id = session['user_id']
+    cur = mysql.connection.cursor()
 
-@app.route('/menu')
-def menu():
-    return render_template('menu.html', current_page='menu')
+    # ดึงข้อมูล User
+    cur.execute("SELECT FirstName, LastName, Email FROM Account WHERE UserID = %s", (user_id,))
+    user = cur.fetchone()
+
+    # ดึงประวัติการประเมินทั้งหมด
+    cur.execute("""
+        SELECT PredictionID, PredictDateTime, Result_Percentage, Result_Binary, Model_Used, UserNote
+        FROM PredictionRecord
+        WHERE UserID = %s
+        ORDER BY PredictDateTime ASC
+    """, (user_id,))
+    records = cur.fetchall()
+
+    cur.close()
+
+    return render_template('profile.html', user=user, records=records, current_page='profile')
+
 
 
 
@@ -569,7 +642,7 @@ def save_result():
             )
             VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
         """
-        
+
         values = (
             user_id, highbp, highchol, bmi, heart,
             genhlth, physhlth, diffwalk, age, bmi_cat_code,
@@ -620,17 +693,222 @@ def save_result():
 
 
 
-@app.route('/admin/dashboard')
-def admin_dashboard():
-    if 'user_id' not in session or session.get('role') != 'Admin':
-        flash("Unauthorized access", "danger")
+
+
+
+
+
+
+@app.route('/menu')
+def menu():
+    return render_template('menu.html', current_page='menu')
+
+
+
+
+
+
+
+@app.route('/account')
+def account():
+    # ตรวจสอบว่า user login แล้วหรือไม่
+    if 'user_id' not in session:
         return redirect(url_for('login'))
-    return render_template('admin_dashboard.html', name=session['first_name'])
+    
+    # ดึงข้อมูล user จาก database
+    cur = mysql.connection.cursor()
+    cur.execute("""
+                SELECT UserID, FirstName, LastName, Email, ProfileImage
+                FROM Account 
+                WHERE UserID=%s""", (session['user_id'],))
+    user = cur.fetchone()
+    cur.close()
+    
+    if user is None:
+        flash("User not found.", "danger")
+        return redirect(url_for('login'))
+    
+    return render_template('account.html', 
+                         current_page='menu',
+                         first_name=user['FirstName'],
+                         last_name=user['LastName'],
+                         email=user['Email'],
+                         profile_image=user['ProfileImage'] or 'default-avatar.png')
 
 
-@app.route('/admin_contact')
-def admin_contact():
-    return render_template('admin_contact.html')    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+@app.route('/update_account', methods=['POST'])
+def update_account():
+    # ตรวจสอบว่า user login แล้วหรือไม่
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+    
+    # รับข้อมูลจาก form
+    first_name = request.form.get('first_name', '').strip()
+    last_name = request.form.get('last_name', '').strip()
+    current_password = request.form.get('current_password', '').strip()
+    new_password = request.form.get('new_password', '').strip()
+    confirm_password = request.form.get('confirm_password', '').strip()
+    
+    # ตรวจสอบว่ากรอก FirstName และ LastName ครบไหม
+    if not first_name or not last_name:
+        flash("Please fill in both first name and last name.", "warning")
+        return redirect(url_for('account'))
+    
+    # ตรวจสอบว่าถ้ากรอก confirm_password แต่ไม่กรอก new_password
+    if confirm_password and not new_password:
+        flash("Cannot fill confirm password without new password.", "danger")
+        return redirect(url_for('account'))
+    
+    # ดึงข้อมูล user จาก database
+    cur = mysql.connection.cursor()
+    cur.execute("SELECT UserID, FirstName, LastName, Email, Password FROM Account WHERE UserID=%s", (session['user_id'],))
+    user = cur.fetchone()
+    cur.close()
+    
+    if user is None:
+        flash("User not found.", "danger")
+        return redirect(url_for('login'))
+    
+    # ตัวแปรเก็บ password ใหม่
+    password_to_update = None
+    
+    # ถ้า user กรอก password ใหม่
+    if new_password:
+        # ตรวจสอบว่า current_password ว่างไหม
+        if not current_password:
+            flash("Please enter your current password to change password.", "warning")
+            return redirect(url_for('account'))
+        
+        # ตรวจสอบว่า new_password กับ confirm_password ตรงกันไหม
+        if new_password != confirm_password:
+            flash("New password and confirm password do not match.", "danger")
+            return redirect(url_for('account'))
+        
+        # ตรวจสอบว่า confirm_password ไม่ว่าง
+        if not confirm_password:
+            flash("Please confirm your new password.", "warning")
+            return redirect(url_for('account'))
+        
+        # ตรวจสอบว่า current_password ถูกต้องไหม
+        if not bcrypt.check_password_hash(user['Password'], current_password):
+            flash("Current password is incorrect.", "danger")
+            return redirect(url_for('account'))
+        
+        # ตรวจสอบความยาวของ password
+        if len(new_password) < 6:
+            flash("New password must be at least 6 characters long.", "warning")
+            return redirect(url_for('account'))
+        
+        # Hash password ใหม่
+        password_to_update = bcrypt.generate_password_hash(new_password).decode('utf-8')
+    
+    # อัปเดตข้อมูลใน database
+    try:
+        cur = mysql.connection.cursor()
+        
+        if password_to_update:
+            # อัปเดต FirstName, LastName, และ Password
+            cur.execute(
+                "UPDATE Account SET FirstName=%s, LastName=%s, Password=%s WHERE UserID=%s",
+                (first_name, last_name, password_to_update, session['user_id'])
+            )
+        else:
+            # อัปเดต FirstName และ LastName เท่านั้น
+            cur.execute(
+                "UPDATE Account SET FirstName=%s, LastName=%s WHERE UserID=%s",
+                (first_name, last_name, session['user_id'])
+            )
+        
+        mysql.connection.commit()
+        cur.close()
+        
+        # อัปเดต session ใหม่
+        session['first_name'] = first_name
+        
+        flash("Account updated successfully.", "success")
+        return redirect(url_for('account'))
+    
+    except Exception as e:
+        mysql.connection.rollback()
+        flash(f"Error updating account: {str(e)}", "danger")
+        return redirect(url_for('account'))
+
+
+
+
+
+
+
+
+
+
+
+    
+
+@app.route('/feedback', methods=['GET', 'POST'])
+def feedback():
+    if request.method == 'POST':
+        name = request.form.get('name')
+        email = request.form.get('email')
+        message = request.form.get('message')
+
+        # ตรวจว่ากรอกครบไหม
+        if not name or not email or not message:
+            flash("กรุณากรอกข้อมูลให้ครบทุกช่อง", "danger")
+        else:
+            try:
+                cur = mysql.connection.cursor()
+                cur.execute("""
+                    INSERT INTO feedback (Name, Email, Message)
+                    VALUES (%s, %s, %s)
+                """, (name, email, message))
+                mysql.connection.commit()
+                cur.close()
+                flash("ส่งข้อเสนอแนะเรียบร้อยแล้ว ✅", "success")
+                return redirect(url_for('feedback'))
+            except Exception as e:
+                print("❌ Feedback Error:", e)
+                flash("เกิดข้อผิดพลาดในการบันทึกข้อมูล", "danger")
+
+    # ถ้าเป็น GET (แค่เปิดหน้าเฉย ๆ)
+    return render_template('feedback.html', current_page='menu')
+
+
+
+# เมื่อผู้ใช้ logout แล้วให้ลบข้อมูลใน session ด้วย
+@app.route('/logout')
+def logout():
+    session.clear()  # ลบข้อมูลทั้งหมดใน session
+    flash("You have been logged out.", "success")
+    return redirect(url_for('sign'))
+
+
+
+# @app.route('/admin/dashboard')
+# def admin_dashboard():
+#     if 'user_id' not in session or session.get('role') != 'Admin':
+#         flash("Unauthorized access", "danger")
+#         return redirect(url_for('login'))
+#     return render_template('admin_dashboard.html', name=session['first_name'])
+
+
+# @app.route('/admin_contact')
+# def admin_contact():
+#     return render_template('admin_contact.html')    
 
 if __name__ == "__main__":
     app.run(debug=True, # เปิด debug mode (ต้องปิดเมื่อ deploy จริง)

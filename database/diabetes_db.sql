@@ -119,3 +119,13 @@ CREATE TABLE ModelFile (
     Status ENUM('Active','Deprecated') DEFAULT 'Active',
     FOREIGN KEY (UploadedBy) REFERENCES Account(UserID)
 );
+
+-- ตารางเก็บกิจกรรมในปฏิทิน
+CREATE TABLE calendar_events (
+    id INTEGER PRIMARY KEY AUTO_INCREMENT,
+    user_id INTEGER NOT NULL,
+    event_date DATE NOT NULL,
+    event_title VARCHAR(200) NOT NULL,
+    event_description VARCHAR(500),
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);

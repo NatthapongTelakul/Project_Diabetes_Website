@@ -1,7 +1,47 @@
 {% extends "header.html" %}
-
 {% block content %}
-<body>
-  <h2> Profile </h2>
-</body>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style-profile.css') }}">
+<div class="container mt-5">
+  <h2 class="text-center mb-4">ประวัติการประเมินโรคเบาหวาน</h2>
+
+  <!-- ข้อมูลผู้ใช้ -->
+  <div class="card p-4 mb-4 shadow-sm">
+    <h4>ข้อมูลผู้ใช้</h4>
+    <p><strong>ชื่อ:</strong> {{ user.FirstName }} {{ user.LastName }}</p>
+    <p><strong>อีเมล:</strong> {{ user.Email }}</p>
+  </div>
+
+  <!-- ตารางแสดงประวัติการประเมิน -->
+  <div class="card p-4 shadow-sm">
+    <h4>ตารางประวัติการประเมิน</h4>
+    <table class="table table-striped mt-3">
+      <thead>
+        <tr>
+          <th>วันที่ประเมิน</th>
+          <th>ผลการประเมิน (%)</th>
+          <th>ผลลัพธ์</th>
+          <th>โมเดลที่ใช้</th>
+          <th>หมายเหตุ</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for record in records %}
+        <tr>
+          <td>{{ record.PredictDateTime.strftime("%Y-%m-%d %H:%M") if record.PredictDateTime else '' }}</td>
+          <td>{{ "%.2f"|format(record.Result_Percentage) }}</td>
+          <td>
+            {% if record.Result_Binary == 1 %}
+              <span class="text-danger fw-bold">มีความเสี่ยงสูง</span>
+            {% else %}
+              <span class="text-success fw-bold">ปกติ</span>
+            {% endif %}
+          </td>
+          <td>{{ record.Model_Used }}</td>
+          <td>{{ record.UserNote or '-' }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
 {% endblock %}

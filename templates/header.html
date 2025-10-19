@@ -37,9 +37,10 @@
                 data-tab="profile" aria-label="Profile" onclick="location.href='{{ url_for('profile') }}'">
             <i class="fa fa-user" aria-hidden="true"></i>
         </button>
-        <a href="{{ url_for('menu') }}" class="tab {% if current_page == 'menu' %}is-active{% endif %}" aria-label="Menu">
-            <i class="fa fa-bars" aria-hidden="true"></i>
-        </a>
+        <button class="tab {% if current_page == 'menu' %}is-active{% endif %}" 
+           data-tab="menu" aria-label="Menu" onclick="location.href='{{ url_for('menu') }}'">
+           <i class="fa fa-bars" aria-hidden="true"></i>
+        </button>
         </nav>
     </header>
     <main>

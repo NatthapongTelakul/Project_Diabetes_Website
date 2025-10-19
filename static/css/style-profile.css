@@ -1,198 +1,61 @@
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
-html, body {
-  width: 100%;
-  height: 100%;
-  font-family: Arial, sans-serif;
-  background: #f0f4f8;
-  overflow: hidden;
-  padding-top: 230px; /* ให้มีช่องว่างให้เนื้อหาเลื่อนออกมาด้านล่างของ header */
-}
-
-/* Header */
-header {
-  width: 100%;
-  height: 230px;
-  background: #26bfdc;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  font-family: Georgia, serif;
-  position: fixed;  /* ตำแหน่ง fixed เพื่อให้ header อยู่กับที่ */
-  top: 0;           /* ให้ตำแหน่ง header อยู่ที่ด้านบน */
-  left: 0;
-  z-index: 10;      /* ทำให้ header อยู่เหนือเนื้อหาด้านล่าง */
-}
-
-header .logo {
-  position: relative;
-  text-align: center;
-  left: -600px;
-  top: -65px;
-}
-
-header .logo h1 {
-  font-size: 48px;
-  font-weight: 400;
-  color: #0a3239;
-  margin: 0;
-  display: inline-block;
-  position: relative;
-}
-
-header .logo .subtitle {
-  position: absolute;
-  top: 45px;
-  left: 75px;
-  right: 0;
-  font-size: 14px;
-  color: #707b7c;
-  text-align: center;
-}
-
-header .welcome {
-  position: absolute;
-  left: 50%;
-  top: 50px;
-  transform: translate(-50%, -50%);
-  font-size: 52px;
-  color: #fff;
-}
-
-header .search {
-  position: absolute;
-  right: 100px;
-  top: 50px;
-  transform: translateY(-50%);
-  width: min(250px, 42vw);
-}
-
-header .search input {
-  width: 100%;
-  padding: 10px 42px 10px 14px;
-  border: none;
-  outline: 0;
-  border-radius: 12px;
-  background: #fff;
-  color: #123;
-  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .06);
-}
-
-header .search button {
-  position: absolute;
-  right: 6px;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 32px;
-  height: 32px;
-  border: none;
-  background: transparent;
-  color: #000;
-  cursor: pointer;
-}
-
-header > .tabbar {
-  position: absolute !important;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  height: 90px;
-  background: #1d64c6;
-  display: flex;
-  align-items: center;
-  justify-content: space-around;
-  padding: 0 24px;
-  overflow: visible;
-  z-index: 2;
-}
-
-header > .tabbar .tab {
-  position: relative;
-  background: transparent;
-  border: 0;
-  outline: 0;
-  width: 72px;
-  height: 72px;
-  display: grid;
-  place-items: center;
-  cursor: pointer;
-  color: #fff;
-  font-size: 0;
-  z-index: 3;
-}
-
-header > .tabbar .tab i {
-  font-size: 30px;
-  line-height: 1;
-}
-
-header > .tabbar .tab-indicator {
-  position: absolute;
-  top: -22px;
-  left: 0;
-  width: 78px;
-  height: 78px;
-  border-radius: 50%;
-  pointer-events: none;
-  transform: translateX(0);
-  transition: transform .45s cubic-bezier(.22,.75,.25,1), background .3s;
-  background: #1d64c6;
-}
-
-header > .tabbar .tab-notch {
-  position: absolute;
-  top: -46px;
-  left: 0;
-  width: 105px;
-  height: 115px;
-  background: #26bfdc;
-  border-radius: 50%;
-  transform: translateX(0);
-  transition: transform .45s cubic-bezier(.22,.75,.25,1);
-  z-index: 1;
-}
-
-header > .tabbar .tab-indicator {
-  z-index: 2;
-}
-
-header > .tabbar .tab {
-  z-index: 3;
-}
-
-header > .tabbar .tab i {
-  transition: transform .45s cubic-bezier(.22,.75,.25,1);
-}
-
-header > .tabbar .tab.is-active i {
-  transform: translateY(-28px);
-}
-
-
-.page{
-  padding:24px
-}
-.card{
-  background:#fff;
-  border-radius:16px;
-  box-shadow:0 10px 30px rgba(0,0,0,.08);
-  padding:24px;
-  min-height:120px
-}
-
-/* พื้นที่คอนเทนต์ของหน้า */
-.page{
-  padding:24px
-}
-
+/* Container */
 .container {
-  display: flex;
-  padding: 10px;
-  margin-top: 230px; /* เว้นพื้นที่ให้ header อยู่ด้านบน */
+    max-width: 900px;
+    margin: 0 auto;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
-/* __________________________________________________________- */
+/* Card style */
+.card {
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+    padding: 20px;
+    margin-bottom: 30px;
+}
+
+/* Table */
+.table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.table th, .table td {
+    text-align: center;
+    padding: 12px 10px;
+    border-bottom: 1px solid #ddd;
+    font-size: 14px;
+}
+
+.table thead th {
+    background-color: #007bff;
+    color: #fff;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.table tbody tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+.table tbody tr:hover {
+    background-color: #e9f5ff;
+}
+
+/* Status colors */
+.text-success {
+    color: #28a745 !important;
+}
+
+.text-danger {
+    color: #dc3545 !important;
+}
+
+/* Responsive */
+@media screen and (max-width: 768px) {
+    .table th, .table td {
+        font-size: 12px;
+        padding: 10px 5px;
+    }
+}
