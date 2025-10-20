@@ -1015,10 +1015,10 @@ def feedback():
                 """, (name, email, message))
                 mysql.connection.commit()
                 cur.close()
-                flash("ส่งข้อเสนอแนะเรียบร้อยแล้ว ✅", "success")
+                flash("ส่งข้อเสนอแนะเรียบร้อยแล้ว", "success")
                 return redirect(url_for('feedback'))
             except Exception as e:
-                print("❌ Feedback Error:", e)
+                print("Feedback Error:", e)
                 flash("เกิดข้อผิดพลาดในการบันทึกข้อมูล", "danger")
 
     # ถ้าเป็น GET (แค่เปิดหน้าเฉย ๆ)
