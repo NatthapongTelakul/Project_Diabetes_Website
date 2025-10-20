@@ -1,8 +1,12 @@
 {% extends "header.html" %}
 {% block content %}
 <div class="container mt-5 mb-5">
-  <h2 class="mb-4 text-center">ปฏิทินกิจกรรม</h2>
-  <div id="calendar"></div>
+  <div class="row">
+    <div class="col-md-12">
+      <h2 class="mb-4 text-center">ปฏิทินกิจกรรม</h2>
+      <div id="calendar"></div>
+    </div>
+  </div>
 </div>
 
 <!-- Modal เพิ่มกิจกรรม -->
@@ -10,12 +14,16 @@
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title">เพิ่มกิจกรรม</h5>
+        <h5 class="modal-title">เพิ่มกิจกรรมใหม่</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
       </div>
       <div class="modal-body">
-        <p id="selectedDate" class="fw-bold"></p>
-        <input type="text" id="eventText" class="form-control" placeholder="พิมพ์ชื่อกิจกรรม...">
+        <p class="text-muted mb-3" id="selectedDate"></p>
+        <div class="mb-3">
+          <label class="form-label">ชื่อกิจกรรม</label>
+          <input type="text" id="eventText" class="form-control" placeholder="กรอกชื่อกิจกรรม..." maxlength="255">
+          <small class="text-muted" id="charCount">0/255</small>
+        </div>
       </div>
       <div class="modal-footer">
         <button class="btn btn-secondary" data-bs-dismiss="modal">ยกเลิก</button>
@@ -25,33 +33,136 @@
   </div>
 </div>
 
-<!-- FullCalendar & Bootstrap CDN -->
+<!-- Modal ดูรายละเอียด -->
+<div class="modal fade" id="eventDetailsModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">รายละเอียดกิจกรรม</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <p class="text-muted mb-3" id="detailDate"></p>
+        <p class="fs-5" id="detailText"></p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-warning" id="editEventBtn">แก้ไข</button>
+        <button class="btn btn-danger" id="deleteEventBtn">ลบ</button>
+        <button class="btn btn-secondary" data-bs-dismiss="modal">ปิด</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal แก้ไขกิจกรรม -->
+<div class="modal fade" id="editEventModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">แก้ไขกิจกรรม</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div class="mb-3">
+          <label class="form-label">ชื่อกิจกรรม</label>
+          <input type="text" id="editEventText" class="form-control" maxlength="255">
+          <small class="text-muted" id="editCharCount">0/255</small>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" data-bs-dismiss="modal">ยกเลิก</button>
+        <button class="btn btn-primary" id="updateEventBtn">บันทึกการแก้ไข</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Bootstrap CDN -->
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-<link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- FullCalendar CDN -->
+<link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
+
+<!-- Thai Locale for FullCalendar -->
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/locales/th.global.min.js"></script>
 
 <style>
   body {
     background-color: #f5f7fa;
   }
+  
   #calendar {
     background-color: white;
     border-radius: 15px;
     padding: 20px;
     box-shadow: 0 3px 10px rgba(0,0,0,0.1);
   }
+
   .fc-toolbar-title {
     font-size: 1.5rem !important;
     color: #007bff;
+    font-weight: 600;
+  }
+
+  .fc-button-primary:not(:disabled).fc-button-active,
+  .fc-button-primary:not(:disabled):hover {
+    background-color: #007bff !important;
+    border-color: #007bff !important;
+  }
+
+  .fc-button-primary:not(:disabled) {
+    background-color: #0d6efd !important;
+    border-color: #0d6efd !important;
+  }
+
+  .fc-daygrid-day.fc-day-other {
+    background-color: #f9f9f9;
+  }
+
+  .fc-daygrid-day:hover {
+    background-color: #f0f0f0;
+  }
+
+  .fc-event {
+    padding: 2px 4px !important;
+    font-size: 0.85rem;
+  }
+
+  .fc-event-title {
+    font-weight: 500;
+  }
+
+  #charCount, #editCharCount {
+    display: block;
+    margin-top: 5px;
+  }
+
+  .badge {
+    font-size: 0.8rem;
   }
 </style>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
   const calendarEl = document.getElementById('calendar');
-  const modal = new bootstrap.Modal(document.getElementById('addEventModal'));
+  const addEventModal = new bootstrap.Modal(document.getElementById('addEventModal'));
+  const eventDetailsModal = new bootstrap.Modal(document.getElementById('eventDetailsModal'));
+  const editEventModal = new bootstrap.Modal(document.getElementById('editEventModal'));
+
   let selectedDate = '';
+  let selectedEventId = null;
+  let allEvents = [];
+
+  // เอฟเฟกต์การนับอักษร
+  document.getElementById('eventText').addEventListener('input', (e) => {
+    document.getElementById('charCount').textContent = e.target.value.length + '/255';
+  });
+
+  document.getElementById('editEventText').addEventListener('input', (e) => {
+    document.getElementById('editCharCount').textContent = e.target.value.length + '/255';
+  });
 
   // สร้างปฏิทิน
   const calendar = new FullCalendar.Calendar(calendarEl, {
@@ -59,50 +170,149 @@ document.addEventListener('DOMContentLoaded', function() {
     selectable: true,
     locale: 'th',
     height: 'auto',
+    headerToolbar: {
+      left: 'prev,next today',
+      center: 'title',
+      right: 'dayGridMonth,dayGridWeek'
+    },
     dateClick: function(info) {
       selectedDate = info.dateStr;
-      document.getElementById('selectedDate').innerText = 'วันที่ ' + info.dateStr;
-      modal.show();
+      const date = new Date(selectedDate);
+      const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+      const formattedDate = date.toLocaleDateString('th-TH', options);
+      document.getElementById('selectedDate').innerText = '📍 ' + formattedDate;
+      document.getElementById('eventText').value = '';
+      document.getElementById('charCount').textContent = '0/255';
+      addEventModal.show();
     },
+    eventClick: function(info) {
+      selectedEventId = parseInt(info.event.id);
+      const event = allEvents.find(e => e.id === selectedEventId);
+      if (event) {
+        const date = new Date(event.start);
+        const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+        const formattedDate = date.toLocaleDateString('th-TH', options);
+        document.getElementById('detailDate').innerText = '📍 ' + formattedDate;
+        document.getElementById('detailText').innerText = event.title;
+        eventDetailsModal.show();
+      }
+    }
   });
 
   calendar.render();
 
   // โหลดกิจกรรมจาก backend
-  fetch('/calendar/events')
-    .then(res => res.json())
-    .then(data => {
-      data.forEach(ev => {
-        calendar.addEvent({
-          title: ev[1],
-          start: ev[0],
-          allDay: true
+  function loadEvents() {
+    fetch('/calendar/events')
+      .then(res => res.json())
+      .then(data => {
+        allEvents = data;
+        calendar.removeAllEvents();
+        data.forEach(ev => {
+          calendar.addEvent({
+            id: ev.id,
+            title: ev.title,
+            start: ev.start,
+            allDay: true
+          });
         });
-      });
-    });
+      })
+      .catch(err => console.error('Error loading events:', err));
+  }
 
-  // เพิ่มกิจกรรมใหม่
+  loadEvents();
+
+  // เพิ่มกิจกรรม
   document.getElementById('saveEventBtn').addEventListener('click', () => {
     const text = document.getElementById('eventText').value.trim();
-    if (!text) return alert('กรุณากรอกชื่อกิจกรรม');
+    if (!text) {
+      alert('กรุณากรอกชื่อกิจกรรม');
+      return;
+    }
 
     fetch('/calendar/add', {
       method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({date: selectedDate, text: text})
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ date: selectedDate, text: text })
     })
     .then(res => res.json())
     .then(result => {
-      alert(result.message);
       if (result.success) {
-        calendar.addEvent({
-          title: text,
-          start: selectedDate,
-          allDay: true
-        });
-        modal.hide();
+        alert(result.message);
+        loadEvents();
+        addEventModal.hide();
         document.getElementById('eventText').value = '';
+        document.getElementById('charCount').textContent = '0/255';
+      } else {
+        alert('❌ ' + result.message);
       }
+    })
+    .catch(err => {
+      console.error('Error:', err);
+      alert('เกิดข้อผิดพลาด');
+    });
+  });
+
+  // แก้ไขกิจกรรม
+  document.getElementById('editEventBtn').addEventListener('click', () => {
+    eventDetailsModal.hide();
+    const event = allEvents.find(e => e.id === selectedEventId);
+    if (event) {
+      document.getElementById('editEventText').value = event.title;
+      document.getElementById('editCharCount').textContent = event.title.length + '/255';
+      editEventModal.show();
+    }
+  });
+
+  document.getElementById('updateEventBtn').addEventListener('click', () => {
+    const text = document.getElementById('editEventText').value.trim();
+    if (!text) {
+      alert('กรุณากรอกชื่อกิจกรรม');
+      return;
+    }
+
+    fetch(`/calendar/update/${selectedEventId}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text: text })
+    })
+    .then(res => res.json())
+    .then(result => {
+      if (result.success) {
+        alert(result.message);
+        loadEvents();
+        editEventModal.hide();
+      } else {
+        alert('❌ ' + result.message);
+      }
+    })
+    .catch(err => {
+      console.error('Error:', err);
+      alert('เกิดข้อผิดพลาด');
+    });
+  });
+
+  // ลบกิจกรรม
+  document.getElementById('deleteEventBtn').addEventListener('click', () => {
+    if (!confirm('ต้องการลบกิจกรรมนี้หรือไม่?')) return;
+
+    fetch(`/calendar/delete/${selectedEventId}`, {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' }
+    })
+    .then(res => res.json())
+    .then(result => {
+      if (result.success) {
+        alert(result.message);
+        loadEvents();
+        eventDetailsModal.hide();
+      } else {
+        alert('❌ ' + result.message);
+      }
+    })
+    .catch(err => {
+      console.error('Error:', err);
+      alert('เกิดข้อผิดพลาด');
     });
   });
 });

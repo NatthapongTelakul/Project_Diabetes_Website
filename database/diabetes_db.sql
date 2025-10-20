@@ -88,15 +88,15 @@ CREATE TABLE PredictionRecord (
 );
 
 -- ตารางบันทึกการกระทำของแอดมิน
-CREATE TABLE AdminLog (
-    LogID INT AUTO_INCREMENT PRIMARY KEY,
-    UserID INT,
-    Action VARCHAR(255),
-    TargetType ENUM('Image','Model','Recommendation'),
-    TargetID INT NULL,
-    Timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (UserID) REFERENCES Account(UserID)
-);
+-- CREATE TABLE AdminLog (
+--     LogID INT AUTO_INCREMENT PRIMARY KEY,
+--     UserID INT,
+--     Action VARCHAR(255),
+--     TargetType ENUM('Image','Model','Recommendation'),
+--     TargetID INT NULL,
+--     Timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+--     FOREIGN KEY (UserID) REFERENCES Account(UserID)
+-- );
 
 -- ตารางรูปภาพความรู้
 -- CREATE TABLE HealthImage (
@@ -110,22 +110,31 @@ CREATE TABLE AdminLog (
 -- );
 
 -- ตารางเก็บไฟล์โมเดล
-CREATE TABLE ModelFile (
-    ModelID INT AUTO_INCREMENT PRIMARY KEY,
-    FileName VARCHAR(255),
-    FilePath VARCHAR(255),
-    UploadedBy INT,
-    UploadedTime DATETIME DEFAULT CURRENT_TIMESTAMP,
-    Status ENUM('Active','Deprecated') DEFAULT 'Active',
-    FOREIGN KEY (UploadedBy) REFERENCES Account(UserID)
-);
+-- CREATE TABLE ModelFile (
+--     ModelID INT AUTO_INCREMENT PRIMARY KEY,
+--     FileName VARCHAR(255),
+--     FilePath VARCHAR(255),
+--     UploadedBy INT,
+--     UploadedTime DATETIME DEFAULT CURRENT_TIMESTAMP,
+--     Status ENUM('Active','Deprecated') DEFAULT 'Active',
+--     FOREIGN KEY (UploadedBy) REFERENCES Account(UserID)
+-- );
 
 -- ตารางเก็บกิจกรรมในปฏิทิน
-CREATE TABLE calendar_events (
-    id INTEGER PRIMARY KEY AUTO_INCREMENT,
-    user_id INTEGER NOT NULL,
-    event_date DATE NOT NULL,
-    event_title VARCHAR(200) NOT NULL,
-    event_description VARCHAR(500),
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+CREATE TABLE CalendarEvent (
+  EventID INT AUTO_INCREMENT PRIMARY KEY,
+  UserID INT,
+  EventDate DATE,
+  EventText VARCHAR(255),
+  FOREIGN KEY (UserID) REFERENCES Account(UserID)
+);
+
+
+-- ตารางเก็บข้อเสนอแนะจากผู้ใช้
+CREATE TABLE feedback (
+  FeedbackID INT AUTO_INCREMENT PRIMARY KEY,
+  Name VARCHAR(100),
+  Email VARCHAR(255),
+  Message TEXT,
+  CreatedAt DATETIME DEFAULT CURRENT_TIMESTAMP
 );

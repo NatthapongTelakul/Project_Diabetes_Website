@@ -1,47 +1,58 @@
 {% extends "header.html" %}
 {% block content %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/style-profile.css') }}">
-<div class="container mt-5">
-  <h2 class="text-center mb-4">ประวัติการประเมินโรคเบาหวาน</h2>
 
-  <!-- ข้อมูลผู้ใช้ -->
-  <div class="card p-4 mb-4 shadow-sm">
-    <h4>ข้อมูลผู้ใช้</h4>
-    <p><strong>ชื่อ:</strong> {{ user.FirstName }} {{ user.LastName }}</p>
-    <p><strong>อีเมล:</strong> {{ user.Email }}</p>
-  </div>
-
-  <!-- ตารางแสดงประวัติการประเมิน -->
-  <div class="card p-4 shadow-sm">
-    <h4>ตารางประวัติการประเมิน</h4>
-    <table class="table table-striped mt-3">
-      <thead>
-        <tr>
-          <th>วันที่ประเมิน</th>
-          <th>ผลการประเมิน (%)</th>
-          <th>ผลลัพธ์</th>
-          <th>โมเดลที่ใช้</th>
-          <th>หมายเหตุ</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for record in records %}
-        <tr>
-          <td>{{ record.PredictDateTime.strftime("%Y-%m-%d %H:%M") if record.PredictDateTime else '' }}</td>
-          <td>{{ "%.2f"|format(record.Result_Percentage) }}</td>
-          <td>
-            {% if record.Result_Binary == 1 %}
-              <span class="text-danger fw-bold">มีความเสี่ยงสูง</span>
+<div class="profile-container">
+    <div class="profile-card">
+        <div class="profile-image-section">
+            {% if user.ProfileImage %}
+                <img src="{{ url_for('static', filename='images/ProfileImage/' + user.ProfileImage) }}" alt="Profile Image" class="profile-image">
             {% else %}
-              <span class="text-success fw-bold">ปกติ</span>
+                <img src="{{ url_for('static', filename='images/ProfileImage/default-avatar.png') }}" alt="Default Profile" class="profile-image">
             {% endif %}
-          </td>
-          <td>{{ record.Model_Used }}</td>
-          <td>{{ record.UserNote or '-' }}</td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-  </div>
+        </div>
+
+        <div class="profile-info">
+            <h2>{{ user.FirstName }} {{ user.LastName }}</h2>
+            <p><strong>Email:</strong> {{ user.Email }}</p>
+        </div>
+    </div>
+
+    <div class="history-section">
+        <h3>ประวัติการประเมิน</h3>
+        {% if records %}
+        <table class="history-table">
+            <thead>
+                <tr>
+                    <th>วันที่ประเมิน</th>
+                    <th>เปอร์เซ็นต์ความเสี่ยง</th>
+                    <th>ผลการประเมิน</th>
+                    <th>โมเดลที่ใช้</th>
+                    <th>บันทึกเพิ่มเติม</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for record in records %}
+                <tr>
+                    <td>{{ record.PredictDateTime.strftime('%Y-%m-%d %H:%M') }}</td>
+                    <td>{{ record.Result_Percentage }}%</td>
+                    <td>
+                        {% if record.Result_Binary == 1 %}
+                            <span class="status high">เสี่ยง</span>
+                        {% else %}
+                            <span class="status low">ปกติ</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ record.Model_Used }}</td>
+                    <td>{{ record.UserNote if record.UserNote else '-' }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+            <p class="no-history">ยังไม่มีประวัติการประเมิน</p>
+        {% endif %}
+    </div>
 </div>
+
 {% endblock %}

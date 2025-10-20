@@ -253,7 +253,8 @@ def home():
 
 
 
-# Route สำหรับแสดงหน้า calendar
+# ========== CALENDAR ROUTES ==========
+
 @app.route('/calendar')
 def calendar():
     if 'user_id' not in session:
@@ -263,38 +264,174 @@ def calendar():
 
 @app.route('/calendar/events', methods=['GET'])
 def get_events():
+    """ดึงกิจกรรมทั้งหมดของผู้ใช้"""
+    if 'user_id' not in session:
+        return jsonify({'error': 'Unauthorized'}), 401
+
     user_id = session.get('user_id')
-    cur = mysql.connection.cursor()
-    cur.execute("SELECT EventDate, EventText FROM CalendarEvent WHERE UserID = %s", (user_id,))
-    events = cur.fetchall()
-    return jsonify(events)
+    
+    try:
+        cur = mysql.connection.cursor()
+        cur.execute(
+            "SELECT EventID, EventDate, EventText FROM CalendarEvent WHERE UserID = %s ORDER BY EventDate",
+            (user_id,)
+        )
+        rows = cur.fetchall()
+        cur.close()
+
+        events = []
+        for row in rows:
+            events.append({
+                'id': row['EventID'],
+                'title': row['EventText'],
+                'start': row['EventDate'].isoformat() if hasattr(row['EventDate'], 'isoformat') else str(row['EventDate']),
+                'allDay': True
+            })
+        
+        return jsonify(events)
+    
+    except Exception as e:
+        print(f"Error fetching events: {str(e)}")
+        return jsonify({'error': str(e)}), 500
 
 
 @app.route('/calendar/add', methods=['POST'])
 def add_event():
+    """เพิ่มกิจกรรมใหม่"""
+    if 'user_id' not in session:
+        return jsonify({'success': False, 'message': 'ไม่ได้รับการยืนยัน'}), 401
+
     user_id = session.get('user_id')
     data = request.get_json()
     event_date = data.get('date')
-    event_text = data.get('text')
+    event_text = data.get('text', '').strip()
 
-    cur = mysql.connection.cursor()
+    # ตรวจสอบความถูกต้อง
+    if not event_date:
+        return jsonify({'success': False, 'message': 'วันที่ไม่ถูกต้อง'})
+    
+    if not event_text or len(event_text) > 255:
+        return jsonify({'success': False, 'message': 'กรุณากรอกชื่อกิจกรรม (สูงสุด 255 ตัวอักษร)'})
 
-    # ตรวจสอบจำนวนกิจกรรมในวันนั้น (ใช้ alias และอ่านจากชื่อคีย์)
-    cur.execute("SELECT COUNT(*) AS count FROM CalendarEvent WHERE UserID = %s AND EventDate = %s", (user_id, event_date))
-    result = cur.fetchone()
-    count = result['count'] if isinstance(result, dict) else result[0]
+    try:
+        # ตรวจสอบวันที่
+        datetime.strptime(event_date, '%Y-%m-%d')
+    except ValueError:
+        return jsonify({'success': False, 'message': 'รูปแบบวันที่ไม่ถูกต้อง'})
 
-    if count >= 5:
-        return jsonify({'success': False, 'message': 'เพิ่มกิจกรรมได้สูงสุด 5 รายการต่อวัน'})
+    try:
+        cur = mysql.connection.cursor()
 
-    cur.execute(
-        "INSERT INTO CalendarEvent (UserID, EventDate, EventText) VALUES (%s, %s, %s)",
-        (user_id, event_date, event_text)
-    )
-    mysql.connection.commit()
-    cur.close()
+        # ตรวจสอบจำนวนกิจกรรมในวันนั้น
+        cur.execute(
+            "SELECT COUNT(*) AS count FROM CalendarEvent WHERE UserID = %s AND EventDate = %s",
+            (user_id, event_date)
+        )
+        result = cur.fetchone()
+        count = result['count']
 
-    return jsonify({'success': True, 'message': 'บันทึกกิจกรรมเรียบร้อยแล้ว'})
+        if count >= 5:
+            cur.close()
+            return jsonify({'success': False, 'message': 'เพิ่มกิจกรรมได้สูงสุด 5 รายการต่อวัน'})
+
+        # เพิ่มกิจกรรม
+        cur.execute(
+            "INSERT INTO CalendarEvent (UserID, EventDate, EventText) VALUES (%s, %s, %s)",
+            (user_id, event_date, event_text)
+        )
+        mysql.connection.commit()
+        
+        event_id = cur.lastrowid
+        cur.close()
+
+        return jsonify({
+            'success': True,
+            'message': 'บันทึกกิจกรรมเรียบร้อยแล้ว',
+            'eventID': event_id
+        })
+
+    except Exception as e:
+        print(f"Error adding event: {str(e)}")
+        return jsonify({'success': False, 'message': f'เกิดข้อผิดพลาด: {str(e)}'}), 500
+
+
+@app.route('/calendar/delete/<int:event_id>', methods=['DELETE'])
+def delete_event(event_id):
+    """ลบกิจกรรม"""
+    if 'user_id' not in session:
+        return jsonify({'success': False, 'message': 'ไม่ได้รับการยืนยัน'}), 401
+
+    user_id = session.get('user_id')
+
+    try:
+        cur = mysql.connection.cursor()
+
+        # ตรวจสอบว่ากิจกรรมนี้เป็นของผู้ใช้คนนี้
+        cur.execute(
+            "SELECT UserID FROM CalendarEvent WHERE EventID = %s",
+            (event_id,)
+        )
+        event = cur.fetchone()
+
+        if not event or event['UserID'] != user_id:
+            cur.close()
+            return jsonify({'success': False, 'message': 'ไม่พบกิจกรรม'}), 404
+
+        # ลบกิจกรรม
+        cur.execute(
+            "DELETE FROM CalendarEvent WHERE EventID = %s AND UserID = %s",
+            (event_id, user_id)
+        )
+        mysql.connection.commit()
+        cur.close()
+
+        return jsonify({'success': True, 'message': 'ลบกิจกรรมเรียบร้อยแล้ว'})
+
+    except Exception as e:
+        print(f"Error deleting event: {str(e)}")
+        return jsonify({'success': False, 'message': f'เกิดข้อผิดพลาด: {str(e)}'}), 500
+
+
+@app.route('/calendar/update/<int:event_id>', methods=['PUT'])
+def update_event(event_id):
+    """แก้ไขกิจกรรม"""
+    if 'user_id' not in session:
+        return jsonify({'success': False, 'message': 'ไม่ได้รับการยืนยัน'}), 401
+
+    user_id = session.get('user_id')
+    data = request.get_json()
+    event_text = data.get('text', '').strip()
+
+    if not event_text or len(event_text) > 255:
+        return jsonify({'success': False, 'message': 'กรุณากรอกชื่อกิจกรรม (สูงสุด 255 ตัวอักษร)'})
+
+    try:
+        cur = mysql.connection.cursor()
+
+        # ตรวจสอบว่ากิจกรรมนี้เป็นของผู้ใช้คนนี้
+        cur.execute(
+            "SELECT UserID FROM CalendarEvent WHERE EventID = %s",
+            (event_id,)
+        )
+        event = cur.fetchone()
+
+        if not event or event['UserID'] != user_id:
+            cur.close()
+            return jsonify({'success': False, 'message': 'ไม่พบกิจกรรม'}), 404
+
+        # แก้ไขกิจกรรม
+        cur.execute(
+            "UPDATE CalendarEvent SET EventText = %s WHERE EventID = %s AND UserID = %s",
+            (event_text, event_id, user_id)
+        )
+        mysql.connection.commit()
+        cur.close()
+
+        return jsonify({'success': True, 'message': 'แก้ไขกิจกรรมเรียบร้อยแล้ว'})
+
+    except Exception as e:
+        print(f"Error updating event: {str(e)}")
+        return jsonify({'success': False, 'message': f'เกิดข้อผิดพลาด: {str(e)}'}), 500
 
 
 
@@ -314,7 +451,7 @@ def profile():
     cur = mysql.connection.cursor()
 
     # ดึงข้อมูล User
-    cur.execute("SELECT FirstName, LastName, Email FROM Account WHERE UserID = %s", (user_id,))
+    cur.execute("SELECT FirstName, LastName, Email, ProfileImage FROM Account WHERE UserID = %s", (user_id,))
     user = cur.fetchone()
 
     # ดึงประวัติการประเมินทั้งหมด

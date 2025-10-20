@@ -399,6 +399,10 @@ main {
   border: none;
 }
 
+.input-box {
+  margin-bottom: 20px;
+}
+
 .number-input {
   width: 100px;
   padding: 12px;
@@ -428,6 +432,76 @@ main {
   font-size: 16px;
   min-width: 30px;
 }
+
+
+
+/* ========== Ruler Scale Above Slider ========== */
+.slider-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.ruler-scale {
+  position: relative;
+  height: 35px;
+  margin: 0 10px 5px;
+  display: flex;
+  justify-content: space-between;
+  background: transparent;
+}
+
+.ruler-scale::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: #cfd8dc;
+  transform: translateY(-50%);
+}
+
+.ruler-scale span {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-size: 11px;
+  color: #666;
+}
+
+.ruler-scale span::before {
+  content: "";
+  width: 2px;
+  height: 10px;
+  background: #888;
+  margin-bottom: 4px;
+}
+
+.ruler-scale span.major::before {
+  height: 16px;
+  background: #333;
+}
+
+.slider-container {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 20px;
+  background: #e0e5ec;
+  border-radius: 20px;
+  box-shadow: 
+    inset 6px 6px 12px #bebebe,
+    inset -6px -6px 12px #ffffff;
+}
+
+
+
+
+
+
+
 
 /* ========== Simple Number Input (Days) ========== */
 .number-input-simple {

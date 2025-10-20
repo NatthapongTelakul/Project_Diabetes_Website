@@ -225,34 +225,43 @@
                 {% elif field.type == 'IntegerField' %}
                     <div class="input-group">
                     {% if fname == 'height' or fname == 'weight' %}
-                        <div class="slider-container">
-                        <input type="range" 
-                                id="{{ fname }}_slider" 
-                                min="{{ field.validators[1].min }}" 
-                                max="{{ field.validators[1].max }}" 
-                                value="{{ field.data or field.validators[1].min }}"
-                                class="range-slider">
-                        <input type="number" 
-                                id="{{ fname }}" 
-                                name="{{ fname }}" 
+                    <div class="slider-section">
+                        <!-- Input number -->
+                        <div class="input-box">
+                            <input type="number"
+                                id="{{ fname }}"
+                                name="{{ fname }}"
                                 class="number-input"
-                                min="{{ field.validators[1].min }}" 
-                                max="{{ field.validators[1].max }}" 
+                                min="{{ field.validators[1].min }}"
+                                max="{{ field.validators[1].max }}"
                                 value="{{ field.data or '' }}"
                                 placeholder="0">
-                        <span class="unit">{% if fname == 'height' %}cm{% else %}kg{% endif %}</span>
+                            <span class="unit">{% if fname == 'height' %}cm{% else %}kg{% endif %}</span>
                         </div>
-                    {% else %}
-                        <input type="number" 
-                            id="{{ fname }}" 
-                            name="{{ fname }}" 
-                            class="number-input-simple"
-                            min="0" 
-                            max="30" 
-                            value="{{ field.data if field.data is not none else '' }}"
-                            placeholder="ใส่จำนวนวัน (0-30)">
-                    {% endif %}
+
+                        <!-- Scale + Slider -->
+                        <div class="slider-wrapper">
+                            <div class="ruler-scale" id="{{ fname }}_scale"></div>
+                            <input type="range"
+                                id="{{ fname }}_slider"
+                                min="{{ field.validators[1].min }}"
+                                max="{{ field.validators[1].max }}"
+                                value="{{ field.data or field.validators[1].min }}"
+                                step="1"
+                                class="range-slider">
+                        </div>
                     </div>
+                    {% else %}
+                    <input type="number" 
+                        id="{{ fname }}" 
+                        name="{{ fname }}" 
+                        class="number-input-simple"
+                        min="0" 
+                        max="30" 
+                        value="{{ field.data if field.data is not none else '' }}"
+                        placeholder="ใส่จำนวนวัน (0-30)">
+                {% endif %}
+                </div>
                 {% endif %}
 
                 {% if field.errors %}
@@ -301,5 +310,36 @@
         slider.value = numberInput.value;
     }
     });
+
+
+    document.addEventListener('DOMContentLoaded', () => {
+    const sliders = document.querySelectorAll('.range-slider');
+    
+    sliders.forEach(slider => {
+        const id = slider.id.replace('_slider', '');
+        const min = parseInt(slider.min);
+        const max = parseInt(slider.max);
+        const scaleContainer = document.getElementById(id + '_scale');
+        const numberInput = document.getElementById(id);
+
+        // สร้างเส้น scale และตัวเลข
+        for (let i = min; i <= max; i += 10) {
+        const tick = document.createElement('span');
+        tick.textContent = i;
+        tick.classList.add('major');
+        scaleContainer.appendChild(tick);
+        }
+
+        // Sync slider <-> number
+        slider.addEventListener('input', () => {
+        numberInput.value = slider.value;
+        });
+
+        numberInput.addEventListener('input', () => {
+        slider.value = numberInput.value;
+        });
+    });
+    });
 </script>
+
 {% endblock %}

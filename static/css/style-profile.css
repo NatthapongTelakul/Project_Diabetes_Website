@@ -1,61 +1,99 @@
-/* Container */
-.container {
+.profile-container {
     max-width: 900px;
-    margin: 0 auto;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 40px auto;
+    padding: 30px;
+    background-color: #ffffff;
+    border-radius: 20px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    font-family: 'Prompt', sans-serif;
 }
 
-/* Card style */
-.card {
-    background-color: #fff;
-    border-radius: 10px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.08);
-    padding: 20px;
-    margin-bottom: 30px;
+.profile-card {
+    display: flex;
+    align-items: center;
+    gap: 30px;
+    padding-bottom: 30px;
+    border-bottom: 2px solid #f0f0f0;
 }
 
-/* Table */
-.table {
+.profile-image-section {
+    flex-shrink: 0;
+}
+
+.profile-image {
+    width: 150px;
+    height: 150px;
+    object-fit: cover;
+    border-radius: 50%;
+    border: 4px solid #4e73df;
+    box-shadow: 0 3px 6px rgba(0,0,0,0.2);
+}
+
+.profile-info {
+    flex-grow: 1;
+}
+
+.profile-info h2 {
+    font-size: 1.8rem;
+    margin: 0;
+    color: #2c3e50;
+}
+
+.profile-info p {
+    color: #555;
+    font-size: 1rem;
+    margin-top: 8px;
+}
+
+.history-section {
+    margin-top: 30px;
+}
+
+.history-section h3 {
+    font-size: 1.4rem;
+    color: #333;
+    margin-bottom: 15px;
+}
+
+.history-table {
     width: 100%;
     border-collapse: collapse;
+    font-size: 0.95rem;
+    background-color: #fafafa;
 }
 
-.table th, .table td {
+.history-table th, .history-table td {
+    border: 1px solid #ddd;
+    padding: 10px 12px;
     text-align: center;
-    padding: 12px 10px;
-    border-bottom: 1px solid #ddd;
-    font-size: 14px;
 }
 
-.table thead th {
-    background-color: #007bff;
-    color: #fff;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
+.history-table th {
+    background-color: #4e73df;
+    color: white;
 }
 
-.table tbody tr:nth-child(even) {
-    background-color: #f9f9f9;
+.history-table tr:nth-child(even) {
+    background-color: #f8f9fc;
 }
 
-.table tbody tr:hover {
-    background-color: #e9f5ff;
+.status {
+    font-weight: bold;
+    padding: 6px 10px;
+    border-radius: 10px;
+    color: white;
 }
 
-/* Status colors */
-.text-success {
-    color: #28a745 !important;
+.status.high {
+    background-color: #e74a3b;
 }
 
-.text-danger {
-    color: #dc3545 !important;
+.status.low {
+    background-color: #1cc88a;
 }
 
-/* Responsive */
-@media screen and (max-width: 768px) {
-    .table th, .table td {
-        font-size: 12px;
-        padding: 10px 5px;
-    }
+.no-history {
+    text-align: center;
+    color: #888;
+    margin-top: 20px;
 }
