@@ -30,7 +30,7 @@ class HeightAndWeightForm(FlaskForm):
     height = IntegerField("ส่วนสูง (cm)",
                           validators=[DataRequired(), NumberRange(min=100, max=250)])
     weight = IntegerField("น้ำหนัก (kg)",
-                          validators=[DataRequired(), NumberRange(min=20, max=300)])
+                          validators=[DataRequired(), NumberRange(min=20, max=200)])
     submit = SubmitField("Next")
 
 class GenHlthForm(FlaskForm):

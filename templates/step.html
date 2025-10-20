@@ -1,6 +1,6 @@
 {% extends "header.html" %}
 {% block content %}
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 
 <link rel="stylesheet" href="{{ url_for('static', filename='css/style-step.css') }}">
 
@@ -279,7 +279,7 @@
             <div class="action-buttons">
             {% if step > 1 %}
                 <a href="{{ url_for('predict_step', step=step-1) }}" class="btn btn-back">
-                    <i class="fa-solid fa-arrow-left"></i>
+                    <i class="fa fa-arrow-left"></i>
                     ย้อนกลับ
                 </a>
             {% endif %}
