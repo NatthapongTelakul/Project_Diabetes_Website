@@ -80,6 +80,7 @@ MYSQL_HOST=localhost
 MYSQL_USER=root
 MYSQL_PASSWORD=your_mysql_password
 MYSQL_DB=diabetes_db
+MYSQL_CURSORCLASS='DictCursor'
 ```
 
 
