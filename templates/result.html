@@ -96,7 +96,7 @@
                                 {{ "%.2f"|format(data.get('bmi')) }} kg/m²
                                 {% set bmi_val = data.get('bmi') %}
                                 {% if bmi_val < 18.5 %}
-                                    <span class="bmi-status">(น้ำหนักต่ำกว่าเกณฑ์)</span>
+                                    <span class="bmi-status yellow">(น้ำหนักต่ำกว่าเกณฑ์)</span>
                                 {% elif bmi_val < 25 %}
                                     <span class="bmi-status green">(น้ำหนักปกติ)</span>
                                 {% elif bmi_val < 30 %}
